@@ -1,0 +1,56 @@
+{
+  "project_info": {
+    "project_number": "824224543900",
+    "firebase_url": "https://warranty-tracker-66e29.firebaseio.com",
+    "project_id": "warranty-tracker-66e29",
+    "storage_bucket": "warranty-tracker-66e29.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:824224543900:android:ed5ca4ad3fe08d42c56959",
+        "android_client_info": {
+          "package_name": "com.example.warranty_tracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "824224543900-vtcmb8ou044bc9mnsj1veg11tdg3ajho.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.warranty_tracker",
+            "certificate_hash": "d44001b0dd36a934de5d1bad928d5480494ab80e"
+          }
+        },
+        {
+          "client_id": "824224543900-fajjgv4lcgpeb6lguh7s3blf5be1cb4u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.warranty_tracker",
+            "certificate_hash": "a3ac85ad7697427a630e5df4ff086423a2c5cbe9"
+          }
+        },
+        {
+          "client_id": "824224543900-8mif49aatlt4vu0erioi9jfjo1nn647d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCf6UksIBVtzPg3fL37-3P5wL6UzpamKlo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "824224543900-8mif49aatlt4vu0erioi9jfjo1nn647d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
