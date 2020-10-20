@@ -16,7 +16,7 @@ class DataService{
   ) async{ 
 
     try{
-      final FirebaseUser user = await _auth.currentUser();
+      final User user = _auth.currentUser;
       final uid = user.uid;
 
       int a = productIdList == null ? 100 : int.parse(productIdList.last.split('P').last) + 1;
@@ -69,10 +69,14 @@ class DataService{
 
       
       
-      await Firestore.instance.collection('customers').document(uid).setData({
+      await FirebaseFirestore.instance.collection('customers').doc(uid).set({
         '$productId' : product,
         'products' : FieldValue.arrayUnion([productId])
-      },merge: true); 
+      }[true]); 
+      //await FirebaseFirestore.instance.collection('customers').doc(uid).set({
+      //  '$productId' : product,
+      //  'products' : FieldValue.arrayUnion([productId])
+     // },merge: true); 
      
       return 'success';
     }catch(e){

@@ -42,8 +42,8 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    return StreamBuilder<FirebaseUser>(
-      stream: FirebaseAuth.instance.onAuthStateChanged,
+    return StreamBuilder<User>(
+      stream: FirebaseAuth.instance.authStateChanges(),
       builder: (BuildContext context ,snapshot){
        
         if(snapshot.connectionState == ConnectionState.waiting){
