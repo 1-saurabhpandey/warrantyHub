@@ -75,7 +75,7 @@ class DataService{
       await FirebaseFirestore.instance.collection('customers').doc(uid).set({
         '$productId' : product,
         'products' : FieldValue.arrayUnion([productId])
-      }[true]); 
+      },); 
       //await FirebaseFirestore.instance.collection('customers').doc(uid).set({
       //  '$productId' : product,
       //  'products' : FieldValue.arrayUnion([productId])
