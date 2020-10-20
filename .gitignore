@@ -38,7 +38,7 @@
 **/android/gradlew.bat
 **/android/local.properties
 **/android/key.properties
-**/android/app/FlutterKey
+**/android/app/FlutterKey/key.jks
 **/android/**/GeneratedPluginRegistrant.java
 
 # Web related
