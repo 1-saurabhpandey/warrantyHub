@@ -30,6 +30,17 @@
 .pub/
 /build/
 
+# Android related
+**/android/**/gradle-wrapper.jar
+**/android/.gradle
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/key.properties
+**/android/app/FlutterKey
+**/android/**/GeneratedPluginRegistrant.java
+
 # Web related
 lib/generated_plugin_registrant.dart
 
