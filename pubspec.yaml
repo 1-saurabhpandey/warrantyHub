@@ -36,7 +36,8 @@ dependencies:
   shared_preferences:
   avatar_glow:
   provider:
-  file_picker: 
+  file_picker:
+  
 
 flutter_icons:
   image_path: "lib/images/dark.jpg"

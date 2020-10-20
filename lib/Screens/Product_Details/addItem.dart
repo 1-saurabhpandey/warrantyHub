@@ -389,7 +389,7 @@ class _AddItemState extends State<AddItem> {
   Future filePicker(BuildContext context,String fileType) async {
 
     if (fileType == 'image') {
-      fileimg = await FilePicker.getFile(type: FileType.image);
+      fileimg = await FilePicker.platform.pickFiles(type: FileType.image);
 
       if (await fileimg.length() > 5000000){
         sizeAlertDialog(context, 'File size is too big! Size must be less than 5Mb' );
@@ -400,7 +400,7 @@ class _AddItemState extends State<AddItem> {
     }
 
     if (fileType == 'billimage') {
-      filedoc = await FilePicker.getFile(type: FileType.image);
+      filedoc = await FilePicker.platform.pickFiles(type: FileType.image);
 
       if ( await filedoc.length() > 5000000){
         sizeAlertDialog(context, 'File size is too big! Size must be less than 5Mb' );
@@ -411,7 +411,7 @@ class _AddItemState extends State<AddItem> {
     }
 
     if (fileType == 'pdf') {
-      filedoc = await FilePicker.getFile(type: FileType.custom, allowedExtensions: ['pdf']);
+      filedoc = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
       String extensionCheck = filedoc.path.split('.').last; 
        
       // to eliminate other extensions

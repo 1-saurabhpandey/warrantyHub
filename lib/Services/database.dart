@@ -87,11 +87,11 @@ class DataService{
 
 
   Future deleteProducts(String productId, int productListLength) async{
-    final FirebaseUser user = await _auth.currentUser();
+    final User user =  _auth.currentUser;
     final uid = user.uid;
 
     try{
-      await Firestore.instance.collection('customers').document(uid).updateData({
+      await FirebaseFirestore.instance.collection('customers').doc(uid).update({
         '$productId' : FieldValue.delete(),
         'products' : productListLength == 1 ? FieldValue.delete() : FieldValue.arrayRemove([productId])
       });
@@ -104,24 +104,24 @@ class DataService{
 
   Stream<DocumentSnapshot> getData() async* {
     
-    final FirebaseUser user = await _auth.currentUser();
+    final User user =  _auth.currentUser;
     final uid = user.uid;
-    yield* Firestore.instance.collection('customers').document(uid).snapshots(); 
+    yield* FirebaseFirestore.instance.collection('customers').doc(uid).snapshots(); 
     
   }
 
   Future getCategory() async{
-    return await Firestore.instance.collection('product_categories').getDocuments(); 
+    return await FirebaseFirestore.instance.collection('product_categories').get(); 
   }
 
   Future getManufacturer() async{
-    return await Firestore.instance.collection('manufacturers').getDocuments();
+    return await FirebaseFirestore.instance.collection('manufacturers').get();
   }
 
 
   Future addNewAddress(String address, String city, String state, String country, int pincode, int phone, String person , String landmark, String addId) async{
     
-    final FirebaseUser user = await _auth.currentUser();
+    final User user =  _auth.currentUser;
     final uid = user.uid;
 
     int a = addId == null ? 100 : int.parse(addId.split('ADD').last) + 1;
@@ -139,9 +139,9 @@ class DataService{
       'landmark' : landmark
     };
     try{
-      await Firestore.instance.collection('customers').document(uid).setData({
+      await FirebaseFirestore.instance.collection('customers').doc(uid).set({
         'addresses' : FieldValue.arrayUnion([data])
-      },merge: true);
+      }); //merge
       return 'success';
     }
     catch(e){
@@ -152,7 +152,7 @@ class DataService{
   Future deleteAddress(String address, String city, String state, String country, int pincode, int phone, String person , String landmark, String addId , int addressListLength) async{
 
 
-    final FirebaseUser user = await _auth.currentUser();
+    final User user =  _auth.currentUser;
     final uid = user.uid;
 
     Map data = {
@@ -168,7 +168,7 @@ class DataService{
     };
 
     try{
-      await Firestore.instance.collection('customers').document(uid).updateData({
+      await FirebaseFirestore.instance.collection('customers').doc(uid).update({
         'addresses' : addressListLength == 1 ? FieldValue.delete() : FieldValue.arrayRemove([data])
       });
       return 'success';
@@ -181,11 +181,11 @@ class DataService{
 
   Future updateAddress(String addressId, String productId) async{
 
-    final FirebaseUser user = await _auth.currentUser();
+    final User user =  _auth.currentUser;
     final uid = user.uid;
 
     try{
-      await Firestore.instance.collection('customers').document(uid).updateData({
+      await FirebaseFirestore.instance.collection('customers').doc(uid).update({
         '$productId.address_id' : addressId
       });
       return 'success';
@@ -201,7 +201,7 @@ class DataService{
   //first upload files in storage
    try {
      
-    final FirebaseUser user = await _auth.currentUser();
+    final User user =  _auth.currentUser;
     final uid = user.uid;
 
    StorageReference storageReference =  FirebaseStorage.instance.ref().child("users/$uid/$productId/bill/$filename");
@@ -218,7 +218,7 @@ class DataService{
       'url' : url
     };
 
-    await Firestore.instance.collection('customers').document(uid).updateData({
+    await FirebaseFirestore.instance.collection('customers').doc(uid).update({
       '$productId.bill' : FieldValue.arrayUnion([values]),
        
     });
@@ -231,7 +231,7 @@ class DataService{
   }
 
   Future deleteBill(String productId, String name, String type, String url)async {
-    final FirebaseUser user = await _auth.currentUser();
+    final User user =  _auth.currentUser;
     final uid = user.uid;
 
     var values = {
@@ -241,7 +241,7 @@ class DataService{
     };
 
     try{
-      await Firestore.instance.collection('customers').document(uid).updateData({
+      await FirebaseFirestore.instance.collection('customers').doc(uid).update({
         '$productId.bill' : FieldValue.arrayRemove([values]),
               
       });

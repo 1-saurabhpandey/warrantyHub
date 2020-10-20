@@ -24,7 +24,7 @@ class _ReceiptState extends State<Receipt> {
 
   final GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
 
-  File filedoc;
+  dynamic filedoc;
   String filepath;
   String filename;
   var data;
@@ -246,7 +246,7 @@ class _ReceiptState extends State<Receipt> {
   Future filePicker(String type) async {
 
     if (type == 'billimage') {
-      filedoc = await FilePicker.getFile(type: FileType.image);
+      filedoc = await FilePicker.platform.pickFiles(type: FileType.image);
         
       if ( await filedoc.length() > 5000000){
         sizeAlert('File size is too big! Size must be less than 5Mb' );
@@ -257,7 +257,7 @@ class _ReceiptState extends State<Receipt> {
     }
 
     if (type == 'pdf') {
-      filedoc = await FilePicker.getFile(type: FileType.custom, allowedExtensions: ['pdf']);
+      filedoc = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
       String extensionCheck = filedoc.path.split('.').last; 
       
        
