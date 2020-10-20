@@ -9,93 +9,68 @@ import 'package:warranty_tracker/main.dart';
 class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    
     return MaterialApp(
       theme: ThemeData(
-        textSelectionColor: Color(0xff5458e1),
-        textSelectionHandleColor: Color(0xff5458e1),
-        accentColor: Color(0xff5458e1),
-        primaryColor: Color(0xff5458e1),
-        colorScheme: ColorScheme.light(primary: const Color(0xff5458e1)),
-        cursorColor: Color(0xff5458e1),
-        buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary)
-      ),
+          textSelectionColor: Color(0xff5458e1),
+          textSelectionHandleColor: Color(0xff5458e1),
+          accentColor: Color(0xff5458e1),
+          primaryColor: Color(0xff5458e1),
+          colorScheme: ColorScheme.light(primary: const Color(0xff5458e1)),
+          cursorColor: Color(0xff5458e1),
+          buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary)),
       debugShowCheckedModeBanner: false,
       home: HomePage(),
     );
   }
 }
-class HomePage extends StatefulWidget {
 
+class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
   final AuthService _auth = AuthService();
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
+      appBar: AppBar(
         title: Text('WarrantyHub'),
-        backgroundColor: Color(0xff5458e1),     
+        backgroundColor: Color(0xff5458e1),
         elevation: 0,
       ),
-        body: Builder(
-          builder: (context) => Items()
-        ),
-        drawer: Drawer(child: buildDrawer()),
+      body: Builder(builder: (context) => Items()),
+      drawer: Drawer(child: buildDrawer()),
     );
   }
 
-  Widget buildDrawer(){
-    return FutureBuilder(
-      future: FirebaseAuth.instance.currentUser(),
-      builder: (BuildContext context, snapshot){
+  Widget buildDrawer() {
+    var user = FirebaseAuth.instance.currentUser;
 
-        if(snapshot.connectionState == ConnectionState.waiting){
-          return CupertinoActivityIndicator();
-        }
-
-        if(snapshot.data == null){
-          return CupertinoActivityIndicator();
-        }
-
-        return ListView(
-          children: <Widget>[
-
-            UserAccountsDrawerHeader(
-              decoration: BoxDecoration(color: Color(0xff5458e1)),
-
-              accountName:  Text(snapshot.data.displayName),   
-              accountEmail: Text(snapshot.data.email),
-
-              currentAccountPicture: CircleAvatar(
-                backgroundImage: NetworkImage(snapshot.data.photoUrl)),           
-            ),
-
-            ListTile(
-              title: Text('My addresses'),
-              leading: Icon(Icons.location_on),
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => AddressPage())),
-            ),
-
-
-            ListTile(
-              title:  Text('Sign Out'),
-              leading: Icon(Icons.exit_to_app),
-              onTap: () async {
-                await _auth.signOut();
-                Navigator.of(context).pop();
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => App()));                     
-              },  
-            ),
-          ]
-        );
-      }
-    );
+    return ListView(children: <Widget>[
+      UserAccountsDrawerHeader(
+        decoration: BoxDecoration(color: Color(0xff5458e1)),
+        accountName: Text(user.displayName),
+        accountEmail: Text(user.email),
+        currentAccountPicture: CircleAvatar(backgroundImage: NetworkImage(user.photoURL)),
+      ),
+      ListTile(
+        title: Text('My addresses'),
+        leading: Icon(Icons.location_on),
+        onTap: () => Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => AddressPage())),
+      ),
+      ListTile(
+        title: Text('Sign Out'),
+        leading: Icon(Icons.exit_to_app),
+        onTap: () async {
+          await _auth.signOut();
+          Navigator.of(context).pop();
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => App()));
+        },
+      ),
+    ]);
   }
 }
-
