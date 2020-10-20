@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 class DataService{
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  // String uid = FirebaseAuth.instance.currentUser.uid;
+ 
   
   Future<String> addProduct( 
 
@@ -18,6 +20,7 @@ class DataService{
     try{
       final User user = _auth.currentUser;
       final uid = user.uid;
+      
 
       int a = productIdList == null ? 100 : int.parse(productIdList.last.split('P').last) + 1;
       String productId = 'P$a';
