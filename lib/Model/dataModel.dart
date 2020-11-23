@@ -34,12 +34,13 @@ class DataModel extends ChangeNotifier{
   }
 
   void setchipdata(var data){
+   
     chipdata = data;
-    
+    notifyListeners();
   }
 
   dynamic getchipdata(){
-    print(chipdata);
+    
     return chipdata;
   }
 

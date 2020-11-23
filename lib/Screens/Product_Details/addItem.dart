@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:file_picker/file_picker.dart';
@@ -45,13 +47,18 @@ class _AddItemState extends State<AddItem> {
   var filedoc;
   String filedocname;
   String finaltype;
+  var chipname;
 
   var catmanStream; 
-
+  bool isChipActive = true;
+  List<String> chipList = [];
+ 
   @override
   Widget build(BuildContext context){
+
     catmanStream = Provider.of<DataModel>(context).getCatManStream();
-    var chipname = Provider.of<DataModel>(context).getchipdata();
+    chipname = Provider.of<DataModel>(context).getchipdata();
+    
     return Scaffold(
       appBar: AppBar(
         title: Text('Add new item'),
@@ -71,7 +78,7 @@ class _AddItemState extends State<AddItem> {
             ),
             child: Form(
               key: _formKey1,
-              child: SingleChildScrollView(
+            child: SingleChildScrollView(
                 child: Column(
                   children: <Widget>[
 
@@ -106,24 +113,51 @@ class _AddItemState extends State<AddItem> {
                       contentPadding: EdgeInsets.only(top:10,left: 50,right: 50), 
                       title: Text('Upload image of product'), 
                       onTap: () async{  
-                       await filePicker(context, 'image').whenComplete((){
-                         print('chipname :$chipname');
-                         setState(() {
-                           
-                         });
-                       } 
-                       );
+
+                       await filePicker(context, 'image'); 
+                        
                       },                   
                     ),
 
-                    Chip(
-                      label: chipname != null ? Text(chipname) : Text('AAAAAAAA')
-                    ),
+                    chipList.isNotEmpty ? ListView.builder(
+                      itemCount: chipList.length,
+                      itemBuilder: (context,index){
+
+                       // String chipName = chipList[index].      extract filename from path
+
+                        return Chip(
+                          label: InkWell(
+                            child: Text('chipname'),
+                            onTap: (){
+                              //open bottom sheet to preview
+                            },
+                          ),
+
+                          deleteIcon: CircleAvatar(
+                            child: Icon(Icons.close),
+                          ),
+
+                          onDeleted: (){
+                            chipList.removeAt(index);
+                          },
+                        );
+                      }
+                    ) : Container(),
+
+                    // isChipActive ? Chip(
+                    //   label: chipname != null ? Text(chipname) : Container(),
+                    //   deleteIcon: Icon(Icons.close),
+                    //   onDeleted: (){
+                    //     setState(() {
+                    //       isChipActive = false; 
+                    //     });
+                    //   },
+                    // ) : Container(),
   
                     ListTile( 
                       leading: Icon(Icons.receipt),
                       contentPadding: EdgeInsets.only(left: 50,right: 50),
-                      title: Text('Upload receipt of product'), 
+                      title: Text('Upload receipt of product'),
                       onTap: () async{
                         selectReceiptType(context);
                       } 
@@ -136,7 +170,6 @@ class _AddItemState extends State<AddItem> {
                       child: addressDropdown(),
                     ),
 
-                            
                     Padding(
                       padding: const EdgeInsets.only(top:40.0,left: 30,right: 30,bottom: 15),
                       child: Container(
@@ -192,7 +225,6 @@ class _AddItemState extends State<AddItem> {
       )
     );
   }
-
 
   Widget buildHeader(String text, int pad){
     return Padding(
@@ -388,21 +420,46 @@ class _AddItemState extends State<AddItem> {
 
   Future filePicker(BuildContext context,String fileType) async {
 
-    if (fileType == 'image') {
-      fileimg = await FilePicker.platform.pickFiles(type: FileType.image);
+    List<String> overSizedFiles = [];
 
-      if (await fileimg.length() > 5000000){
-        sizeAlertDialog(context, 'File size is too big! Size must be less than 5Mb' );
+    if (fileType == 'image') {
+
+      FilePickerResult imageFiles = await FilePicker.platform.pickFiles(type: FileType.image, allowMultiple: true);
+    
+      if(imageFiles.count > 1){
+        for(int i =0; i < imageFiles.count; i++){
+
+          if(imageFiles.files[i].size > 5000000){
+            overSizedFiles.add(imageFiles.files[i].name);
+            
+          } 
+          else{
+            chipList.add(imageFiles.files[i].path);
+          }
+        }
+      }
+      else if(imageFiles.files.first.size > 5000000){ 
+        sizeAlertDialog(context, 'File size is too big! Size must be less than 5Mb' ); 
       }
       else{
-        preview(context,fileimg,fileType);
+        chipList.add(imageFiles.files.first.path);
       }
+
+      if(overSizedFiles.length > 0){
+        sizeAlertDialog(context, 'File size is too big! Size must be less than 5Mb' );
+      }
+      // if (await fileimg.count > 5000000){
+      //   sizeAlertDialog(context, 'File size is too big! Size must be less than 5Mb' );
+      // } 
+      // else{
+      //   preview(context,fileimg,fileType);
+      // }
     }
 
     if (fileType == 'billimage') {
-      filedoc = await FilePicker.platform.pickFiles(type: FileType.image);
+      filedoc = await FilePicker.platform.pickFiles(type: FileType.image, allowMultiple: true);
 
-      if ( await filedoc.length() > 5000000){
+      if ( await filedoc.count  > 5000000){
         sizeAlertDialog(context, 'File size is too big! Size must be less than 5Mb' );
       }
       else{
@@ -420,7 +477,7 @@ class _AddItemState extends State<AddItem> {
       }
       else{
 
-        if(await filedoc.length() > 5000000 ){
+        if(await filedoc.count > 5000000 ){
           sizeAlertDialog(context, 'File size is too big! Size must be less than 5Mb');
         }
         else{
@@ -452,14 +509,17 @@ class _AddItemState extends State<AddItem> {
     ); 
   }
   // preview
-  Future preview(BuildContext context , dynamic file, String type) async{
+  Future preview(BuildContext context , FilePickerResult file1, String type) async{
+    
+    String path = file1.paths.first;
+    File file = File(path);
 
     if(type == 'pdf' || type == 'billimage'){
       filedocname = file.path.split('/').reversed.first.split('.').first;
       receiptName = TextEditingController(text: filedocname);
     }
 
-    var document = type == 'pdf' ?  await PDFDocument.fromFile(filedoc) : null;
+    var document = type == 'pdf' ?  await PDFDocument.fromFile(file) : null;
 
     return showBottomSheet(
       context: context,
@@ -528,8 +588,9 @@ class _AddItemState extends State<AddItem> {
 
                           fileimg = file;
                           fileimgname = fileimg.path.split('/').reversed.first.split('.').first;
+                         
                           Provider.of<DataModel>(context,listen: false).setchipdata(fileimgname);
-                          Navigator.of(context).pop(fileimgname);
+                          // Navigator.of(context).pop(fileimgname);
 
                         }
                       if(type != 'image' && _formKey2.currentState.validate()){
@@ -539,11 +600,13 @@ class _AddItemState extends State<AddItem> {
                           finaltype = type;
                         }
                         Navigator.of(context).pop();
-                      }
+                      } 
                     }, child: Text('Save',style: TextStyle(color: Colors.white),)),
+
+                    
                   ],
                 ),
-              ),
+              )
             ],
           )
         );

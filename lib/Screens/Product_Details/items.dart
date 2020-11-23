@@ -20,7 +20,7 @@ class _ItemsState extends State<Items> {
   String status;
   int difference ;
   String timeLeft ;
-  String purchaseDate ;
+  String purchaseDate;
   List productsIdList;
 
   var stream;
@@ -126,7 +126,7 @@ class _ItemsState extends State<Items> {
                   timeLeft = "Expires on $date2 ";
                 }
                 return Padding(
-                  padding: const EdgeInsets.fromLTRB(20,15,20,5),
+                  padding: const EdgeInsets.fromLTRB(10,5,10,5), 
                   child: Card(
                     elevation: 7, 
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), 
@@ -154,10 +154,10 @@ class _ItemsState extends State<Items> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
                             Padding(
-                              padding: const EdgeInsets.only(left: 15), 
+                              padding: const EdgeInsets.only(left: 8,right: 8), 
                               child: Container(
                                           
-                                height: 100, width: 100,
+                                height: 120, width: 120,
                                 child: Center(
                                   child: products["image"] == null
                                   ? Image.asset('lib/images/noimage.jpg')
@@ -167,49 +167,49 @@ class _ItemsState extends State<Items> {
                               ),
                             ),
 
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: <Widget>[
-                                SizedBox(height: 30,),
-                                Padding(
-                                  padding: const EdgeInsets.all(5),
-                                  child: Container(
-                                    width: 150,
-                                    child: Column(
-                                      children: <Widget>[
-                                              
-                                        Text( 
-                                          products["name"], 
-                                          textAlign: TextAlign.center,
-                                          style: GoogleFonts.oswald(textStyle:TextStyle(fontSize: 25))
-                                        ),          
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
 
-                                        Text(
-                                          products["category"],
-                                          style: GoogleFonts.sourceSansPro(textStyle:TextStyle(fontSize: 17))),
-                                      ],
+                                  Padding(
+                                    padding: const EdgeInsets.all(5.0),
+                                    child: Text( 
+                                      products["name"], 
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.oswald(textStyle:TextStyle(fontSize: 25))
                                     ),
-                                  ),
-                                ),
-                                    
-                                Padding(
-                                  padding: const EdgeInsets.all(5), 
-                                  child: Text(timeLeft,style: GoogleFonts.sourceSansPro(
-                                    textStyle:TextStyle(fontSize: 17,fontWeight: FontWeight.w500))),
-                                ), 
+                                  ), 
 
-                                Padding(
-                                  padding: const EdgeInsets.only(top:5.0,bottom: 10),
-                                  child: Chip(
-                                    label: Text(
-                                      status, style: TextStyle(
-                                      fontSize: 16,fontWeight: FontWeight.bold,
-                                      color: status == 'Active' ? Colors.green : Colors.red
-                                    )),
-                                    backgroundColor: status == 'Active' ? Colors.green[100] : Colors.red[100], 
-                                  )
-                                ),
-                              ],
+                                  Padding(
+                                    padding: const EdgeInsets.all(5.0),
+                                    child: Text(
+                                      products["category"],
+                                      style: GoogleFonts.sourceSansPro(textStyle:TextStyle(fontSize: 17))),
+                                  ),
+                                  
+                                  
+                                      
+                                  Padding(
+                                    padding: const EdgeInsets.all(5), 
+                                    child: Text(timeLeft,style: GoogleFonts.sourceSansPro(
+                                      textStyle:TextStyle(fontSize: 17,fontWeight: FontWeight.w500))),
+                                  ), 
+
+                                  Padding(
+                                    padding: const EdgeInsets.only(top:5.0,bottom: 3), 
+                                    child: Chip(
+                                      label: Text(
+                                        status, style: TextStyle(
+                                        fontSize: 16,fontWeight: FontWeight.bold,
+                                        color: status == 'Active' ? Colors.green : Colors.red
+                                      )),
+                                      backgroundColor: status == 'Active' ? Colors.green[100] : Colors.red[100], 
+                                    )
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),

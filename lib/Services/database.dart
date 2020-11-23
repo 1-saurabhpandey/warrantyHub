@@ -6,41 +6,51 @@ import 'package:flutter/material.dart';
 
 class DataService{
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  // String uid = FirebaseAuth.instance.currentUser.uid;
- 
+  User user = FirebaseAuth.instance.currentUser;
   
   Future<String> addProduct( 
 
-    String productName ,List productIdList , Timestamp purchase , Timestamp expiry ,String category ,
-    String manufacturer , String invoice , String address , var fileimg , String fileimgname , var filedoc , String filedocname, 
-    String billtype , String retailer, String retailerAddress
+    String productName,
+    List productIdList,
+    Timestamp purchase,
+    Timestamp expiry,
+    String category,
+    String manufacturer,
+    String invoice,
+    String address, 
+    String fileimgname,
+    String filedocname,
+    String billtype,
+    String retailer,
+    String retailerAddress,
+    var filedoc,
+    var fileimg,
+
   ) async{ 
 
     try{
-      final User user = _auth.currentUser;
-      final uid = user.uid;
-      
+
+      String urldoc;
+      String urlimg;
+      String uid = user.uid;
 
       int a = productIdList == null ? 100 : int.parse(productIdList.last.split('P').last) + 1;
       String productId = 'P$a';
   
       //first upload files to storage
-      String urldoc;
-      String urlimg;
-
-      StorageReference storageReference1 = FirebaseStorage.instance.ref().child("users/$uid/$productId/bill/$filedocname");
-      StorageReference storageReference2 = FirebaseStorage.instance.ref().child("users/$uid/$productId/image/$fileimgname");
+     
+      Reference storageReference1 = FirebaseStorage.instance.ref().child("users/$uid/$productId/bill/$filedocname");
+      Reference storageReference2 = FirebaseStorage.instance.ref().child("users/$uid/$productId/image/$fileimgname");
 
       if(filedoc != null){
-        final StorageUploadTask uploadTask1 = storageReference1.putFile(filedoc);
-        final StorageTaskSnapshot downloadUrl1 = (await uploadTask1.onComplete);
+        final UploadTask uploadTask1 = storageReference1.putFile(filedoc);
+        final TaskSnapshot downloadUrl1 = (await uploadTask1);
         urldoc = (await downloadUrl1.ref.getDownloadURL());
 
       }
       if(fileimg != null){
-        final StorageUploadTask uploadTask2 = storageReference2.putFile(fileimg);
-        final StorageTaskSnapshot downloadUrl2 = (await uploadTask2.onComplete);
+        final UploadTask uploadTask2 = storageReference2.putFile(fileimg);
+        final TaskSnapshot downloadUrl2 = (await uploadTask2);
         urlimg = (await downloadUrl2.ref.getDownloadURL());
       }
     
@@ -75,7 +85,8 @@ class DataService{
       await FirebaseFirestore.instance.collection('customers').doc(uid).set({
         '$productId' : product,
         'products' : FieldValue.arrayUnion([productId])
-      },); 
+      }, SetOptions(merge: true)); 
+      
       //await FirebaseFirestore.instance.collection('customers').doc(uid).set({
       //  '$productId' : product,
       //  'products' : FieldValue.arrayUnion([productId])
@@ -90,11 +101,9 @@ class DataService{
 
 
   Future deleteProducts(String productId, int productListLength) async{
-    final User user =  _auth.currentUser;
-    final uid = user.uid;
-
+   
     try{
-      await FirebaseFirestore.instance.collection('customers').doc(uid).update({
+      await FirebaseFirestore.instance.collection('customers').doc(user.uid).update({
         '$productId' : FieldValue.delete(),
         'products' : productListLength == 1 ? FieldValue.delete() : FieldValue.arrayRemove([productId])
       });
@@ -106,10 +115,8 @@ class DataService{
   }
 
   Stream<DocumentSnapshot> getData() async* {
-    
-    final User user =  _auth.currentUser;
-    final uid = user.uid;
-    yield* FirebaseFirestore.instance.collection('customers').doc(uid).snapshots(); 
+
+    yield* FirebaseFirestore.instance.collection('customers').doc(user.uid).snapshots(); 
     
   }
 
@@ -123,9 +130,6 @@ class DataService{
 
 
   Future addNewAddress(String address, String city, String state, String country, int pincode, int phone, String person , String landmark, String addId) async{
-    
-    final User user =  _auth.currentUser;
-    final uid = user.uid;
 
     int a = addId == null ? 100 : int.parse(addId.split('ADD').last) + 1;
     String id = 'ADD$a';
@@ -142,9 +146,11 @@ class DataService{
       'landmark' : landmark
     };
     try{
-      await FirebaseFirestore.instance.collection('customers').doc(uid).set({
-        'addresses' : FieldValue.arrayUnion([data])
-      }); //merge
+      await FirebaseFirestore.instance.collection('customers').doc(user.uid).set({
+        'addresses' : FieldValue.arrayUnion([data]),
+
+      },SetOptions(merge: true));
+      
       return 'success';
     }
     catch(e){
@@ -152,11 +158,17 @@ class DataService{
     }
   }
 
-  Future deleteAddress(String address, String city, String state, String country, int pincode, int phone, String person , String landmark, String addId , int addressListLength) async{
-
-
-    final User user =  _auth.currentUser;
-    final uid = user.uid;
+  Future deleteAddress(
+    String address, 
+    String city, 
+    String state, 
+    String country, 
+    int pincode, 
+    int phone, 
+    String person , 
+    String landmark, 
+    String addId , 
+    int addressListLength) async{
 
     Map data = {
       'id' : addId,
@@ -171,7 +183,7 @@ class DataService{
     };
 
     try{
-      await FirebaseFirestore.instance.collection('customers').doc(uid).update({
+      await FirebaseFirestore.instance.collection('customers').doc(user.uid).update({
         'addresses' : addressListLength == 1 ? FieldValue.delete() : FieldValue.arrayRemove([data])
       });
       return 'success';
@@ -184,11 +196,8 @@ class DataService{
 
   Future updateAddress(String addressId, String productId) async{
 
-    final User user =  _auth.currentUser;
-    final uid = user.uid;
-
     try{
-      await FirebaseFirestore.instance.collection('customers').doc(uid).update({
+      await FirebaseFirestore.instance.collection('customers').doc(user.uid).update({
         '$productId.address_id' : addressId
       });
       return 'success';
@@ -203,14 +212,13 @@ class DataService{
   
   //first upload files in storage
    try {
-     
-    final User user =  _auth.currentUser;
-    final uid = user.uid;
 
-   StorageReference storageReference =  FirebaseStorage.instance.ref().child("users/$uid/$productId/bill/$filename");
+    String uid = user.uid;
 
-    final StorageUploadTask uploadTask = storageReference.putFile(file);
-    final StorageTaskSnapshot downloadUrl = (await uploadTask.onComplete);
+    Reference storageReference =  FirebaseStorage.instance.ref().child("users/$uid/$productId/bill/$filename");
+
+    final UploadTask uploadTask = storageReference.putFile(file);
+    final TaskSnapshot downloadUrl = (await uploadTask);
     final String url = (await downloadUrl.ref.getDownloadURL());
 
    // then upload url in firestore
@@ -234,9 +242,6 @@ class DataService{
   }
 
   Future deleteBill(String productId, String name, String type, String url)async {
-    final User user =  _auth.currentUser;
-    final uid = user.uid;
-
     var values = {
       'name' : name,
       'type' : type,
@@ -244,7 +249,7 @@ class DataService{
     };
 
     try{
-      await FirebaseFirestore.instance.collection('customers').doc(uid).update({
+      await FirebaseFirestore.instance.collection('customers').doc(user.uid).update({
         '$productId.bill' : FieldValue.arrayRemove([values]),
               
       });
