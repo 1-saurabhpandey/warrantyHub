@@ -1,3 +1,4 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:warranty_tracker/Model/dataModel.dart';
 import 'package:warranty_tracker/Screens/Address_Details/newAddress.dart';
 import 'package:warranty_tracker/Screens/Product_Details/itembill.dart';
+import 'package:warranty_tracker/Screens/Common_Widgets/preview.dart';
 import 'package:warranty_tracker/Services/database.dart';
 
 
@@ -22,13 +24,25 @@ class ItemDetail extends StatefulWidget {
 class _ItemDetailState extends State<ItemDetail> {
 
   String status ;
+  int productListLength;
   
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context){ 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xff5458e1),
         title: Text('Product Details'),
+        actions: [
+          PopupMenuButton(
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                child: Text('Delete'),
+                value: 'delete',
+              )
+            ],
+            onSelected: (value) => delete(context, widget.productId , productListLength)
+          )
+        ]
       ),
       backgroundColor: Color(0xfff0f4ff),
       body: itemDetails()
@@ -42,14 +56,14 @@ class _ItemDetailState extends State<ItemDetail> {
 
     //to check before deleting whether this is last product of list or not
     List productIdList = data['products'] ?? null;
-    int productListLength = productIdList != null ?  productIdList.length : 0;
+    productListLength = productIdList != null ?  productIdList.length : 0;
+    
     
     return ListView.builder(
       itemCount: 1,
       itemBuilder: (context,index){
                        
-        Map result = data[widget.productId];
-        
+        Map result = data[widget.productId];        
         DateTime date = DateTime.now();
         var format = DateFormat('dd/MM/yyyy'); 
 
@@ -67,149 +81,106 @@ class _ItemDetailState extends State<ItemDetail> {
 
         return result != null
           ? Container(
-                       
               child: Column(
               children: <Widget>[
 
-                Padding(
-                  padding: const EdgeInsets.all(13),
-                  child: result['image'] != null 
-                  ? Image.network(result['image'],height: 280,width: 280 ,)
-                  : Image.asset('lib/images/noimage.jpg')
-                ),
+                result['image'] != null 
+                  ? CarouselSlider(
+                    options: CarouselOptions(
+                      height: 250, autoPlay: true,
+                      viewportFraction: 0.65, 
+                      autoPlayInterval: Duration(seconds: 4), 
+                      autoPlayCurve: Curves.decelerate,
+                      pauseAutoPlayOnTouch: true,
+                      enlargeCenterPage: true,
+                    ),
 
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 5),
-                  child: Align(
-                    alignment: Alignment.center,
-                    child:  Container(
-                      padding: EdgeInsets.all(3),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(4),
-                        color: status == 'Active' ? Colors.green : Colors.red,
-                      ),
-                      child: Text(
-                        status,style: GoogleFonts.raleway( 
-                        textStyle:TextStyle(
+                    items: List.generate(
+                      result['image'].length, (index){ 
+
+                        return Card(
                           color: Colors.white,
-                          fontSize: 20, fontWeight: FontWeight.bold)
-                        )
-                      ),
+                          elevation: 8, 
+                          child: Padding( 
+                            padding: const EdgeInsets.all(3.0),
+                            child: Container(
+                              height: 30,width: 200,
+                              child: InkWell(
+                                child: Image.network( 
+                                  result['image'][index],fit:BoxFit.fitWidth,
+                                  loadingBuilder: (context, child, loadingProgress){
+                                    return loadingProgress == null 
+                                    ? child 
+                                    : Center(
+                                      child: CircularProgressIndicator(
+                                        value: loadingProgress.expectedTotalBytes != null 
+                                        ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes : null
+                                      ),
+                                    );
+                                  },
+                                ),
+                                onTap: () => Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (context) => Preview(result['name'], null, 'image', result['image'][index]))),
+                              )
+                            ),
+                          ),
+                        );
+                      }
                     )
+                  )
+                : Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Container(
+                    height: 200,width: 200,
+                    child: InkWell(
+                      child: Image.asset('lib/images/noimage.jpg')
+                    ) 
                   ),
                 ),
 
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(10,20,10,10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-
-                      Expanded(
-                        child: RichText(
-                          text: TextSpan(
-                            children : [
-                              TextSpan(
-                                text: '${result['name']}\n',
-                                style: GoogleFonts.oswald(
-                                  textStyle:TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 30),
-                                ),
-                              ),
-                              TextSpan(
-                                text: result['category'],
-                                style: GoogleFonts.sourceSansPro(
-                                  textStyle:TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 18),
-                                ),
-                              ),
-                            ]
-                          ),
-                        )
-                      ),
-                      
-                      IconButton( 
-                        icon: Icon(Icons.delete),
-                        onPressed:()=> delete(context, widget.productId , productListLength),
-                      )
-                    ],
-                  ), 
-                ),
-
-                Padding( 
-                  padding: const EdgeInsets.fromLTRB(10,30,10,20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-
-                      richText('Purchase Date\n', formattedPurchaseDate, 17, 20),
-                      richText('Expiry Date\n', formattedExpiryDate, 17, 20),
-                      
-                     
-                    ],
-                  ),
-                ),
-                SizedBox(height: 5,),
+                  padding: const EdgeInsets.only(top:5.0,bottom: 3), 
+                  child: Chip(
+                    // shape: RoundedRectangleBorder(side: BorderSide(color: Colors.green),borderRadius: BorderRadius.circular(20)), 
+                    label: Text(
+                      status, style: TextStyle(
+                      fontSize: 16,fontWeight: FontWeight.bold,
+                      color: status == 'Active' ? Colors.green : Colors.red
+                    )),  
+                    
+                    backgroundColor: status == 'Active' ? Colors.green[100] : Colors.red[100], 
+                  )
+                ), 
+                
                 Padding(
                   padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: Card(
-                      elevation: 4,
-                      child: ListTile(
-                        leading: Icon(Icons.receipt),
-                        title: Text('Product Receipt',
-                          style: TextStyle(fontSize: 15),),
-                        onTap:() =>
-                          WidgetsBinding.instance.addPostFrameCallback((_) async {
-                              
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (BuildContext context) => Receipt(productid: widget.productId,)));
-                          }
-                        )
-                      ),
+                  child: Card(
+                    elevation: 4,
+                    child: ListTile(
+                      leading: Icon(Icons.receipt),
+                      title: Text('Product Receipts',
+                        style: TextStyle(fontSize: 15),),
+                      onTap:() =>
+                        WidgetsBinding.instance.addPostFrameCallback((_) async {
+                            
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (BuildContext context) => Receipt(productid: widget.productId,)));
+                        }
+                      )
                     ),
                   ),
                 ),
+                
+                productHighlightsCard(result, formattedPurchaseDate, formattedExpiryDate),
                 productDetailsCard(result),
-
                 retailerCard(result),
-
                 addressCard(addressData, result['address_id'])
-                  
+
               ],
             ),
           )
         : Container();
       }
-    );
-  }
-
-  Widget richText(String text1, String text2, double fontsize1, double fontsize2){
-
-    return RichText(
-      text: TextSpan(
-        children : [
-          TextSpan(
-            text: text1,
-            style: GoogleFonts.sourceSansPro(
-              textStyle:TextStyle(
-                color: Colors.black,
-                fontSize: fontsize1),
-            ),
-          ),
-          TextSpan(
-            text: text2,
-            style: GoogleFonts.oswald(
-              textStyle:TextStyle(
-                color: Colors.black,
-                fontSize: fontsize2),
-            ),
-          ),
-        ]
-      ),
     );
   }
 
@@ -245,6 +216,36 @@ class _ItemDetailState extends State<ItemDetail> {
     );
   }
 
+  Widget productHighlightsCard(Map data, String purchase, String expiry){
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Card(
+        child: Container(
+          padding: EdgeInsets.fromLTRB(8, 5, 8, 5),
+          child: Column( 
+            children: <Widget>[
+ 
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10), 
+                child: Align( 
+                  alignment: Alignment.topLeft,
+                  child: Text('Product Highlights',
+                    style: GoogleFonts.oswald(textStyle:  TextStyle(fontSize: 20),)),
+                ),
+              ),
+              
+              rowData('Product Name', data['name'],context),
+              rowData('Product Category', data['category'],context),
+              rowData('Purchase Date', purchase,context),
+              rowData('Expiry Date', expiry,context),
+            ]
+          )
+        ),
+      ),
+    );
+  }
+
   Widget productDetailsCard(Map data){
     
     var format = DateFormat('dd/MM/yyyy');
@@ -253,25 +254,25 @@ class _ItemDetailState extends State<ItemDetail> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Card(
-        child: Container(
-          padding: EdgeInsets.all(8),
+        child: Container( 
+          padding: EdgeInsets.fromLTRB(8, 5, 8, 5),
           child: Column( 
             children: <Widget>[
  
-              Align( 
-                alignment: Alignment.topLeft,
-                child: Text('Product Details',
-                style: GoogleFonts.oswald(textStyle:  TextStyle(fontSize: 20),)),),
-
               Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: rowData('Manufacturer', data['manufacturer'], context),
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Align( 
+                  alignment: Alignment.topLeft,
+                  child: Text('Product Details',
+                  style: GoogleFonts.oswald(textStyle:  TextStyle(fontSize: 20),)),),
               ),
+
+              rowData('Manufacturer', data['manufacturer'], context),
               rowData('Product', 'Product name goes here',context),
-              rowData('Product description', 'Product description goes here',context),
-              rowData('Product added on', formattedAddedOn,context),  
-              rowData('Product added by', data['added_by'],context),
-              rowData('Product Invoice no', data['invoice_no'],context),
+              rowData('Product Description', 'Product description goes here',context),
+              rowData('Product Added On', formattedAddedOn,context),  
+              rowData('Product Added By', data['added_by'],context),
+              rowData('Product Invoice No', data['invoice_no'],context),
 
 
             ]
@@ -420,7 +421,7 @@ class _ItemDetailState extends State<ItemDetail> {
               onPressed: ()async {
                 var result = await DataService().deleteProducts(productId, productListLength);
 
-                Navigator.of(context,rootNavigator: true).pop(result);
+                Navigator.of(context,rootNavigator: true).pop();
                 Navigator.of(context).pop(result);
               },
             )

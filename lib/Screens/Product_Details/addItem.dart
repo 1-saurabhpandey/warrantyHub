@@ -5,12 +5,13 @@ import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_plugin_pdf_viewer/flutter_plugin_pdf_viewer.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:warranty_tracker/Model/dataModel.dart';
 import 'package:warranty_tracker/Screens/Address_Details/newAddress.dart';
+import 'package:warranty_tracker/Screens/Common_Widgets/alert.dart';
 import 'package:warranty_tracker/Screens/Product_Details/catmanSearch.dart';
+import 'package:warranty_tracker/Screens/Common_Widgets/preview.dart';
 import 'package:warranty_tracker/Services/database.dart';
 
 class AddItem extends StatefulWidget {
@@ -25,8 +26,6 @@ class AddItem extends StatefulWidget {
 class _AddItemState extends State<AddItem> {
 
   var _formKey1 = GlobalKey<FormState>();
-  var _formKey2 = GlobalKey<FormState>();
-
 
   TextEditingController namecon = TextEditingController();
   TextEditingController purchasecon = TextEditingController();
@@ -34,6 +33,7 @@ class _AddItemState extends State<AddItem> {
   TextEditingController invoicecon = TextEditingController();
   TextEditingController receiptName = TextEditingController();
   TextEditingController retailercon = TextEditingController();
+   
   TextEditingController retailerAddresscon = TextEditingController();
   TextEditingController manufacturercon = TextEditingController();
   TextEditingController categorycon = TextEditingController();
@@ -47,17 +47,17 @@ class _AddItemState extends State<AddItem> {
   var filedoc;
   String filedocname;
   String finaltype;
-  var chipname;
-
+  
   var catmanStream; 
-  bool isChipActive = true;
-  List<String> chipList = [];
+  List<String> imageList = [];
+  List<String> billList = [];
  
   @override
   Widget build(BuildContext context){
 
     catmanStream = Provider.of<DataModel>(context).getCatManStream();
-    chipname = Provider.of<DataModel>(context).getchipdata();
+    imageList = Provider.of<DataModel>(context).getProductImage();
+    billList = Provider.of<DataModel>(context).getProductBill();
     
     return Scaffold(
       appBar: AppBar(
@@ -82,86 +82,68 @@ class _AddItemState extends State<AddItem> {
                 child: Column(
                   children: <Widget>[
 
-                    // buildHeader('PRODUCT INFORMATION', 0),
+                    buildHeader('PRODUCT INFORMATION', 0),
 
-                    // commonFields('What would you like to call your product?', 'Please Enter name of product', namecon),
+                    commonFields('What would you like to call your product?', 'Please Enter name of product', namecon),
   
-                    // Column(
-                    //   children: [
-                    //     catmanField('Category'),
-                    //     catmanField('Manufacturer'),
-                    //   ],
-                    // ),
+                    Column(
+                      children: [
+                        catmanField('Category'),
+                        catmanField('Manufacturer'),
+                      ],                      
+                    ),
 
-                    // buildHeader('WARRANTY INFORMATION', 0),
+                    buildHeader('WARRANTY INFORMATION', 0),
 
-                    // dateField('purchase'),
-                    // dateField('expiry'),
+                    dateField('purchase'),
+                    dateField('expiry'),
 
-                    // commonFields('Product invoice number', 'Please enter product invoice number', invoicecon),
+                    commonFields('Product invoice number', 'Please enter product invoice number', invoicecon),
 
-                    // buildHeader('RETAILER DETAILS',0),
+                    buildHeader('RETAILER DETAILS',0),
 
-                    // commonFields('Retailer name', null, retailercon),
-                    // commonFields('Retailer address', null, retailerAddresscon),
+                    commonFields('Retailer name', null, retailercon),
+                    commonFields('Retailer address', null, retailerAddresscon),
 
                     buildHeader('PRODUCT RECEIPT',0),
                           
                         
-                    ListTile(
+                    ListTile( 
                       leading: Icon(Icons.photo_camera),
-                      contentPadding: EdgeInsets.only(top:10,left: 50,right: 50), 
                       title: Text('Upload image of product'), 
                       onTap: () async{  
 
-                       await filePicker(context, 'image'); 
+                       imageList.length == 5 
+                       ? alertWidget(context, 'You can upload only 5 images per product') 
+                       : filePicker(context, 'image'); 
                         
                       },                   
                     ),
-
-                    chipList.isNotEmpty ? ListView.builder(
-                      itemCount: chipList.length,
-                      itemBuilder: (context,index){
-
-                       // String chipName = chipList[index].      extract filename from path
-
-                        return Chip(
-                          label: InkWell(
-                            child: Text('chipname'),
-                            onTap: (){
-                              //open bottom sheet to preview
-                            },
-                          ),
-
-                          deleteIcon: CircleAvatar(
-                            child: Icon(Icons.close),
-                          ),
-
-                          onDeleted: (){
-                            chipList.removeAt(index);
-                          },
-                        );
-                      }
-                    ) : Container(),
-
-                    // isChipActive ? Chip(
-                    //   label: chipname != null ? Text(chipname) : Container(),
-                    //   deleteIcon: Icon(Icons.close),
-                    //   onDeleted: (){
-                    //     setState(() {
-                    //       isChipActive = false; 
-                    //     });
-                    //   },
-                    // ) : Container(),
+ 
+                    imageList.length > 0 
+                      ? Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Container( child: selectedFiles(imageList), color: Color(0xffeaeaea)),
+                      ) 
+                      : Container(),
   
                     ListTile( 
                       leading: Icon(Icons.receipt),
-                      contentPadding: EdgeInsets.only(left: 50,right: 50),
                       title: Text('Upload receipt of product'),
                       onTap: () async{
-                        selectReceiptType(context);
+
+                        billList.length == 5 
+                        ? alertWidget(context, 'You can upload only 5 bills per product') 
+                        : filePicker(context,'bill');
                       } 
-                    ),  
+                    ),
+
+                    billList.length > 0 
+                    ? Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container( child: selectedFiles(billList), color: Color(0xffeaeaea)),
+                    ) 
+                    : Container(),
 
                     buildHeader('ADDRESS ASSOCIATED WITH THIS PRODUCT',0),
 
@@ -189,7 +171,13 @@ class _AddItemState extends State<AddItem> {
                                       Center(
                                         child: Padding(  
                                           padding: const EdgeInsets.all(8.0),
-                                          child: Text('Uploading...'),
+                                          child: Row(
+                                            children: [
+                                              CircularProgressIndicator(),
+                                              SizedBox(width:10),
+                                              Text('Uploading...'),
+                                            ],
+                                          ),
                                         ),
                                       )
                                     ], 
@@ -197,9 +185,10 @@ class _AddItemState extends State<AddItem> {
                                 }
                               );
 
-                              var result = await DataService().addProduct(namecon.text, widget.productsIdList, Timestamp.fromDate(purchase) ,
-                                Timestamp.fromDate(expiry) , categorycon.text, manufacturercon.text, invoicecon.text, address, fileimg,
-                                fileimgname, filedoc, filedocname, finaltype , retailercon.text , retailerAddresscon.text
+                              var result = await DataService().addProduct(
+                                namecon.text, widget.productsIdList, Timestamp.fromDate(purchase) ,
+                                Timestamp.fromDate(expiry) , categorycon.text, manufacturercon.text, invoicecon.text, address,
+                                retailercon.text , retailerAddresscon.text ,imageList, billList
                               );
 
                               Navigator.of(context,rootNavigator: true).pop();
@@ -244,6 +233,7 @@ class _AddItemState extends State<AddItem> {
       padding: const EdgeInsets.fromLTRB(30, 10, 30, 15),
       child: TextFormField(
         controller: controller,
+        textInputAction: label == "Retailer address" ? TextInputAction.done : TextInputAction.next,
         decoration: InputDecoration(
           labelText: label),
         validator: (String val ){
@@ -260,7 +250,7 @@ class _AddItemState extends State<AddItem> {
 
         format: DateFormat("yyyy-MM-dd"),
         controller: type == 'expiry' ? expirycon : purchasecon,
-
+        textInputAction: TextInputAction.next,
         decoration: InputDecoration(
           labelText:type == 'expiry' ? 'Expiry Date' : 'Purchase Date',
         ),
@@ -287,7 +277,7 @@ class _AddItemState extends State<AddItem> {
 
     List<String> dataList = [];
  
-    var stream = type == 'Category' ? catmanStream[0] : catmanStream[1];
+    var stream = type == 'Category' ? catmanStream[0] : catmanStream[1]; 
 
     return FutureBuilder(
       future: stream,
@@ -372,50 +362,49 @@ class _AddItemState extends State<AddItem> {
     );
   }
 
-  Future selectReceiptType(BuildContext context){
-    return showDialog(
-      context: context,
-      builder: (BuildContext dcontext){
-        return SimpleDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))), 
-          children: [
-            Column(
-              children: <Widget>[
+  Widget selectedFiles(List fileList){
 
-                SizedBox(height:10),
+    return Column(
+      children: List.generate(
+        fileList.length,(index){
 
-                Align(
-                  child: Container(
-                    width: 60,
-                    height: 3,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(3)),
-                      color: Colors.grey))),
+          String fileType = fileList[index].split('.').last;
+          String fileName = fileList[index].split('/').last.split('.').first; 
+          double size = num.parse((File(fileList[index]).lengthSync() / 1000).toStringAsFixed(1)) ;
+          String sizeType;
 
-                SizedBox(height: 20,),
+          if(size > 1000){
+            size = num.parse((size / 1000).toStringAsFixed(1)); 
+            sizeType = 'MB';
+          } 
+          else{ 
+            sizeType = 'kB';
+          }
 
-                ListTile(
-                  leading: Icon(Icons.image,color: Colors.blue,),
-                  title: Text('Upload as image'),
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(30, 2, 30, 2), 
+            child: Card(
+              elevation: 5, 
+              child: ListTile(  
+                leading: fileType == 'pdf' ? Icon(Icons.picture_as_pdf, color: Colors.red) : Icon(Icons.image, color: Colors.blue),
+                title: Text(fileName),
+                subtitle: Text('$size $sizeType'),
+                trailing: InkWell(
+                  child: Icon(Icons.close),
                   onTap: (){
-                    filePicker(context, 'billimage');
-                    Navigator.of(dcontext).pop();
-                  }),
-
-                ListTile(
-                  leading: Icon(Icons.picture_as_pdf,color: Colors.red,),
-                  title: Text('Upload as PDF'),
-                  onTap: (){
-                    filePicker(context, 'pdf');
-                    Navigator.of(dcontext).pop();
+                    setState(() {
+                      fileList.removeAt(index);
+                    });
                   },
-                )
-              ],
-            ),
-          ]
-        );
-      }
-    );
+                ), 
+
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => Preview(fileName,fileList[index],fileType,null))), 
+              ),
+            )
+          );
+        }
+      )
+    ); 
   }
 
   Future filePicker(BuildContext context,String fileType) async {
@@ -425,192 +414,58 @@ class _AddItemState extends State<AddItem> {
     if (fileType == 'image') {
 
       FilePickerResult imageFiles = await FilePicker.platform.pickFiles(type: FileType.image, allowMultiple: true);
-    
-      if(imageFiles.count > 1){
-        for(int i =0; i < imageFiles.count; i++){
 
-          if(imageFiles.files[i].size > 5000000){
-            overSizedFiles.add(imageFiles.files[i].name);
-            
-          } 
-          else{
-            chipList.add(imageFiles.files[i].path);
+      if(imageFiles != null){
+        if(imageFiles.count > 5 || imageList.length == 5){
+          alertWidget(context, 'You can only upload 5 images per product'); 
+        }
+
+        if(imageFiles.count <= 5){
+          for(int i = 0; i < imageFiles.count; i++){
+
+            if(imageFiles.files[i].size > 5000){
+              overSizedFiles.add(imageFiles.files[i].name); 
+            } 
+            else if(imageList.length < 5){
+              Provider.of<DataModel>(context,listen: false).setProductImage(imageFiles.files[i].path);
+            }
           }
         }
-      }
-      else if(imageFiles.files.first.size > 5000000){ 
-        sizeAlertDialog(context, 'File size is too big! Size must be less than 5Mb' ); 
-      }
-      else{
-        chipList.add(imageFiles.files.first.path);
-      }
 
-      if(overSizedFiles.length > 0){
-        sizeAlertDialog(context, 'File size is too big! Size must be less than 5Mb' );
-      }
-      // if (await fileimg.count > 5000000){
-      //   sizeAlertDialog(context, 'File size is too big! Size must be less than 5Mb' );
-      // } 
-      // else{
-      //   preview(context,fileimg,fileType);
-      // }
-    }
-
-    if (fileType == 'billimage') {
-      filedoc = await FilePicker.platform.pickFiles(type: FileType.image, allowMultiple: true);
-
-      if ( await filedoc.count  > 5000000){
-        sizeAlertDialog(context, 'File size is too big! Size must be less than 5Mb' );
-      }
-      else{
-        preview(context,filedoc,fileType);
-      }
-    }
-
-    if (fileType == 'pdf') {
-      filedoc = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
-      String extensionCheck = filedoc.path.split('.').last; 
-       
-      // to eliminate other extensions
-      if(extensionCheck != 'pdf'){
-        sizeAlertDialog(context, 'Only PDF documents allowed');
-      }
-      else{
-
-        if(await filedoc.count > 5000000 ){
-          sizeAlertDialog(context, 'File size is too big! Size must be less than 5Mb');
+        if(overSizedFiles.length > 0){
+          alertWidget(context, 'File size is too big! Size must be less than 5Mb' );
         }
-        else{
-          preview(context, filedoc, fileType);
-        }
-      }       
-    }
-  }
-  // Size alert dialog
-
-  Future sizeAlertDialog(BuildContext context, String alertMessage){
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))), 
-          title: Text('Sorry...'),
-          content: Text(alertMessage),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            )
-          ],
-        );
       }
-    ); 
-  }
-  // preview
-  Future preview(BuildContext context , FilePickerResult file1, String type) async{
-    
-    String path = file1.paths.first;
-    File file = File(path);
-
-    if(type == 'pdf' || type == 'billimage'){
-      filedocname = file.path.split('/').reversed.first.split('.').first;
-      receiptName = TextEditingController(text: filedocname);
     }
 
-    var document = type == 'pdf' ?  await PDFDocument.fromFile(file) : null;
+    if (fileType == 'bill') {
 
-    return showBottomSheet(
-      context: context,
-      builder:(BuildContext context){
-        return Container(
-          child: ListView(
-            children: <Widget>[
-              Align(
-                alignment: Alignment.bottomCenter ,
-                child: Container(
+      FilePickerResult filedoc = await FilePicker.platform.pickFiles( 
+        type: FileType.custom, allowedExtensions: ['pdf','jpg','jpeg','png'],
+        allowMultiple: true
+      );
 
-                  child: type == 'pdf'
-                  ? Container(
-                    padding: EdgeInsets.all(10), 
-                    width: 480,height: 480, 
-                    child: PDFViewer (document: document,showPicker: false,)) 
-  
-                  : Image.file(file,width: 450,height: 450,)
-                )),
+      if(filedoc != null){
+        if(filedoc.count > 5 || billList.length == 5){
+          alertWidget(context, 'You can only upload 5 bills per product'); 
+        }
 
-                type != 'image' ? Form(
-                  key: _formKey2,
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left:20,right: 20,bottom: 10,top:10),
-                        child: TextFormField(
-                          controller: receiptName,
-                          cursorColor: Color(0xff5458e1),
-                          decoration: InputDecoration(
-                            focusColor: Color(0xff5458e1),
-                            fillColor: Color(0xff5458e1), 
-                          
-                            labelText: 'File name', 
-                            border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(5))),),
-                          validator: (String val){
-                            return val.isEmpty ? 'Please Enter the receipt name' : null;
-                          },
-                          onChanged: (val){ 
-                            filedocname = val;
-                          },
-                        ),
-                      ),
-                    ]
-                  )
-                ) 
-                      
-              : Container(),
+        if(filedoc.count <= 5){
+          for(int i = 0; i < filedoc.count; i++){
+ 
+            if(filedoc.files[i].size > 5000){
+              overSizedFiles.add(filedoc.files[i].name); 
+            } 
+            if(billList.length < 5){
+              Provider.of<DataModel>(context,listen: false).setProductBill(filedoc.files[i].path);
+            }
+          }
+        }
 
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    RaisedButton(color: Color(0xff5458e1),
-                      onPressed: (){                // again calling filepicker to get new file
-                        filePicker(context, type);
-                      },      
-                    
-                      child: Text('Select another',style: TextStyle(color: Colors.white),)),
-
-                    RaisedButton(
-                      color:Color(0xff5458e1),
-                      onPressed: (){
-                        if(type == 'image'){       
-
-                          fileimg = file;
-                          fileimgname = fileimg.path.split('/').reversed.first.split('.').first;
-                         
-                          Provider.of<DataModel>(context,listen: false).setchipdata(fileimgname);
-                          // Navigator.of(context).pop(fileimgname);
-
-                        }
-                      if(type != 'image' && _formKey2.currentState.validate()){
-                        
-                        if(type == 'billimage' || type == 'pdf'){
-                          filedoc = file;
-                          finaltype = type;
-                        }
-                        Navigator.of(context).pop();
-                      } 
-                    }, child: Text('Save',style: TextStyle(color: Colors.white),)),
-
-                    
-                  ],
-                ),
-              )
-            ],
-          )
-        );
-      } 
-    );
+        if(overSizedFiles.length > 0){
+          alertWidget(context, 'File size is too big! Size must be less than 5Mb'); 
+        }
+      }
+    }
   }
 }

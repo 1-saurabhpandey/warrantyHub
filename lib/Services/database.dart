@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -18,17 +19,18 @@ class DataService{
     String manufacturer,
     String invoice,
     String address, 
-    String fileimgname,
-    String filedocname,
-    String billtype,
     String retailer,
     String retailerAddress,
-    var filedoc,
-    var fileimg,
+    List imageList,
+    List billList
 
   ) async{ 
 
     try{
+
+      List billUrlList = [];
+      List imgUrlList = [];
+      List<Map> bill = [];
 
       String urldoc;
       String urlimg;
@@ -38,30 +40,42 @@ class DataService{
       String productId = 'P$a';
   
       //first upload files to storage
-     
-      Reference storageReference1 = FirebaseStorage.instance.ref().child("users/$uid/$productId/bill/$filedocname");
-      Reference storageReference2 = FirebaseStorage.instance.ref().child("users/$uid/$productId/image/$fileimgname");
 
-      if(filedoc != null){
-        final UploadTask uploadTask1 = storageReference1.putFile(filedoc);
-        final TaskSnapshot downloadUrl1 = (await uploadTask1);
-        urldoc = (await downloadUrl1.ref.getDownloadURL());
+      if(billList != null){
+        for (int i = 0; i < billList.length; i++) {
 
+          UploadTask uploadTask1 = FirebaseStorage.instance.ref().child("users/$uid/$productId/bill/Receipt ${i+1}").putFile(File(billList[i]));
+          TaskSnapshot downloadUrl1 = (await uploadTask1);
+          urldoc = (await downloadUrl1.ref.getDownloadURL());
+          billUrlList.add(urldoc);
+        }
       }
-      if(fileimg != null){
-        final UploadTask uploadTask2 = storageReference2.putFile(fileimg);
-        final TaskSnapshot downloadUrl2 = (await uploadTask2);
-        urlimg = (await downloadUrl2.ref.getDownloadURL());
+
+      if(imageList != null){
+        for (int i = 0; i < imageList.length; i++) {
+
+          UploadTask uploadTask2 = FirebaseStorage.instance.ref().child("users/$uid/$productId/image/Image ${i+1}").putFile(File(imageList[i]));
+          TaskSnapshot downloadUrl2 = (await uploadTask2);
+          urlimg = (await downloadUrl2.ref.getDownloadURL());
+          imgUrlList.add(urlimg);
+        }
       }
-    
       
       //then upload to firestore
 
-      List<Map> bill = filedoc == null ? [] : [{
-        'name' : filedocname,
-        'type' : billtype,
-        'url' : urldoc
-      }];
+      if(billUrlList != null){
+        for (int i = 0; i < billList.length; i++) {
+
+          String ext = billList[i].split('.').last;   //storing extension of every bill
+          var a = {
+            'type' : ext,
+            'url' : billUrlList[i]
+          };
+          bill.add(a);
+        }
+      }else{
+        bill = [];
+      }
 
       Map product = {
         'added_by' : user.displayName,
@@ -70,7 +84,7 @@ class DataService{
         'bill' : bill,
         'category' : category,
         'expiry' : expiry,
-        'image' : fileimg == null ? null : urlimg,
+        'image' : imgUrlList == null ? [] : imgUrlList,
         'invoice_no' : invoice,
         'isActive' : true,
         'manufacturer' : manufacturer,
@@ -79,26 +93,18 @@ class DataService{
         'retailer' : retailer,
         'retailer_address' : retailerAddress,
       };
-
-      
       
       await FirebaseFirestore.instance.collection('customers').doc(uid).set({
         '$productId' : product,
         'products' : FieldValue.arrayUnion([productId])
       }, SetOptions(merge: true)); 
-      
-      //await FirebaseFirestore.instance.collection('customers').doc(uid).set({
-      //  '$productId' : product,
-      //  'products' : FieldValue.arrayUnion([productId])
-     // },merge: true); 
-     
-      return 'success';
+       
+      return 'success';                                                                                                                                                                                                                                                                                
     }catch(e){
       print(e.toString());
       return 'error';
     }
   }
-
 
   Future deleteProducts(String productId, int productListLength) async{
    
@@ -208,7 +214,7 @@ class DataService{
     
   }
 
-  Future<String> uploadItemBill(dynamic file,String fileType,String filename, String productId,BuildContext context) async {
+  Future<String> uploadItemBill(File file,String fileType,String filename, String productId,BuildContext context) async {
   
   //first upload files in storage
    try {

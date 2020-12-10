@@ -5,7 +5,8 @@ class DataModel extends ChangeNotifier{
   var productsData;
   List addressData;
   List catmanStream;
-  var chipdata;
+  List<String> imageDataList = [];
+  List<String> billDataList = [];
 
   void setProductsData(var data){
     productsData = data;
@@ -33,15 +34,30 @@ class DataModel extends ChangeNotifier{
     return catmanStream;
   }
 
-  void setchipdata(var data){
+  void setProductImage(var data){
    
-    chipdata = data;
+    imageDataList.add(data);
     notifyListeners();
   }
 
-  dynamic getchipdata(){
-    
-    return chipdata;
+  dynamic getProductImage(){
+    return imageDataList;
+  }
+
+  void setProductBill(var data){
+   
+    billDataList.add(data);
+    notifyListeners();
+  }
+
+  dynamic getProductBill(){
+    return billDataList;
+  }
+
+  void clearImageandBillList(){
+    print('clear');
+    imageDataList.clear();
+    billDataList.clear();
   }
 
 }

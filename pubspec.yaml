@@ -38,6 +38,7 @@ dependencies:
   provider:
   file_picker:
   firebase_core: 
+  carousel_slider:
   
   
   
