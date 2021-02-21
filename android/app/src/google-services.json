@@ -15,7 +15,7 @@
       },
       "oauth_client": [
         {
-          "client_id": "824224543900-oelp3q9rp99lpdurpmq79otrcj7uduag.apps.googleusercontent.com",
+          "client_id": "824224543900-ild3k7log0he18gqqt60uf51g4spelnf.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.warranty_tracker",
@@ -23,11 +23,11 @@
           }
         },
         {
-          "client_id": "824224543900-q5qqc6i2ig07hjvfaoh2p4jo67u5d3vu.apps.googleusercontent.com",
+          "client_id": "824224543900-hlkqtke2irpplgruu4hnpqf0vfflqlm7.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.warranty_tracker",
-            "certificate_hash": "ded3c6a0ff9b145571b8104020ac68efea42c334"
+            "certificate_hash": "8139129f8e6c45ed9521618f906ad9e17d288338"
           }
         },
         {

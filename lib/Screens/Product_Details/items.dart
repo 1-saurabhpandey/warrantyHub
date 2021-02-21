@@ -28,11 +28,11 @@ class _ItemsState extends State<Items> {
 
   @override
   void initState() {
+    super.initState();
     stream = DataService().getData();
     catmanStream();
-    super.initState();
   }
- 
+  
   void catmanStream(){
     var catStream = DataService().getCategory();
     var manStream = DataService().getManufacturer();
@@ -52,19 +52,21 @@ class _ItemsState extends State<Items> {
         child: Icon(Icons.add,color: Colors.white),
         elevation: 7,mini: true,
         onPressed: ()async {
+          
+          Provider.of<DataModel>(context,listen:false).clearImageandBillList();
 
-         var result = await Navigator.of(context).push(
+          var result = await Navigator.of(context).push(
           MaterialPageRoute(builder:(BuildContext context) => AddItem(productsIdList: productsIdList,)));
           
-         if(result != null){
-           _globalKey.currentState 
-          .showSnackBar(
-            SnackBar(
-              content: result == 'success'  ? Text('New product added successfully') : Text('Some error occured'),
-              duration: Duration(seconds: 3)
-            )
-          );
-         }  
+          if(result != null){
+            _globalKey.currentState 
+            .showSnackBar(
+              SnackBar(
+                content: result == 'success'  ? Text('New product added successfully') : Text('Some error occured'),
+                duration: Duration(seconds: 3)
+              )
+            );
+          }  
         }
       ),
           
@@ -125,6 +127,7 @@ class _ItemsState extends State<Items> {
                   difference = expiryDate.difference(date).inDays;
                   timeLeft = "Expires on $date2 ";
                 }
+                
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(10,5,10,5), 
                   child: Card(
@@ -161,9 +164,18 @@ class _ItemsState extends State<Items> {
                                 child: Center(
                                   child: products["image"] == null
                                   ? Image.asset('lib/images/noimage.jpg')
-
-                                  : Image.network(products["image"]))
-                                          
+                                  : Image.network( 
+                                    products["image"][0],fit: BoxFit.fitWidth, 
+                                    loadingBuilder: (context, child, loadingProgress){
+                                      return loadingProgress == null 
+                                      ? child 
+                                      : CircularProgressIndicator(
+                                        value: loadingProgress.expectedTotalBytes != null 
+                                        ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes : null
+                                      );
+                                    },
+                                  )
+                                )
                               ),
                             ),
 
@@ -188,9 +200,7 @@ class _ItemsState extends State<Items> {
                                       products["category"],
                                       style: GoogleFonts.sourceSansPro(textStyle:TextStyle(fontSize: 17))),
                                   ),
-                                  
-                                  
-                                      
+                            
                                   Padding(
                                     padding: const EdgeInsets.all(5), 
                                     child: Text(timeLeft,style: GoogleFonts.sourceSansPro(
@@ -220,7 +230,7 @@ class _ItemsState extends State<Items> {
               },
             )
             : noProduct();
-          }  // when uid document doesnot exist it will throw error 99caa4 cbe3b3 
+          }  // when uid document doesnot exist it will throw error
           catch(e){
            return noProduct();
           }
