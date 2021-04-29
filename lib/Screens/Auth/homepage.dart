@@ -11,13 +11,16 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-          textSelectionColor: Color(0xff5458e1),
-          textSelectionHandleColor: Color(0xff5458e1),
-          accentColor: Color(0xff5458e1),
-          primaryColor: Color(0xff5458e1),
-          colorScheme: ColorScheme.light(primary: const Color(0xff5458e1)),
-          cursorColor: Color(0xff5458e1),
-          buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary)),
+        textSelectionTheme: TextSelectionThemeData(
+          selectionColor: Color(0xff5458e1),
+          selectionHandleColor: Color(0xff5458e1),
+          cursorColor: Color(0xff5458e1)
+        ),
+         
+        accentColor: Color(0xff5458e1),
+        primaryColor: Color(0xff5458e1),
+        colorScheme: ColorScheme.light(primary: const Color(0xff5458e1)),
+        buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary)),
       debugShowCheckedModeBanner: false,
       home: HomePage(),
     );
@@ -30,9 +33,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final AuthService _auth = AuthService();
+  final AuthService _auth = AuthService(); 
 
-  @override
+  @override 
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -40,20 +43,21 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Color(0xff5458e1),
         elevation: 0,
       ),
-      body: Builder(builder: (context) => Items()),
+      body: Builder(builder: (context) => Items()), 
       drawer: Drawer(child: buildDrawer()),
     );
   }
 
   Widget buildDrawer() {
-    var user = FirebaseAuth.instance.currentUser;
+    User user = FirebaseAuth.instance.currentUser!;
 
-    return ListView(children: <Widget>[
+    return ListView(
+      children: <Widget>[
       UserAccountsDrawerHeader(
         decoration: BoxDecoration(color: Color(0xff5458e1)),
-        accountName: Text(user.displayName),
-        accountEmail: Text(user.email),
-        currentAccountPicture: CircleAvatar(backgroundImage: NetworkImage(user.photoURL)),
+        accountName: Text(user.displayName!),
+        accountEmail: Text(user.email!),
+        currentAccountPicture: CircleAvatar(backgroundImage: NetworkImage(user.photoURL!)),
       ),
       ListTile(
         title: Text('My addresses'),
@@ -65,10 +69,10 @@ class _HomePageState extends State<HomePage> {
         title: Text('Sign Out'),
         leading: Icon(Icons.exit_to_app),
         onTap: () async {
+          
           await _auth.signOut();
           Navigator.of(context).pop();
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => App()));
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) => App()));
         },
       ),
     ]);

@@ -17,8 +17,8 @@ class _AddressPageState extends State<AddressPage> {
   @override
   Widget build(BuildContext context) {
 
-    List data = Provider.of<DataModel>(context).getAddressData();
-    int addressListLength = data != null ? data.length : null;
+    List? data = Provider.of<DataModel>(context).getAddressData();
+    int addressListLength = data != null ? data.length : 0;
    
     return Scaffold(
       key: _globalKey,
@@ -38,7 +38,8 @@ class _AddressPageState extends State<AddressPage> {
           MaterialPageRoute(builder: (_) => NewAddress())
         );
           if(result != null) {
-            _globalKey.currentState.showSnackBar(
+            ScaffoldMessenger.of(context).showSnackBar(
+            
             SnackBar(
               content: result == 'error' ?  Text('Some error occured') : Text('New address added successfully'),
               duration: Duration(seconds: 3),
@@ -113,11 +114,14 @@ class _AddressPageState extends State<AddressPage> {
                             )),
                           ),
 
-                          InkWell(
-                            child: Container(
-                              child: Image.asset('lib/images/logo/map2.png',scale: 1.5,),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: InkWell(
+                              child: Container(
+                                child: Image.asset('lib/images/map.png',height:30,width:30),
+                              ),
+                              // onTap: () => launchMap(data[index]['geolocation'].latitude, data[index]['geolocation'].longitude),
                             ),
-                            // onTap: () => launchMap(data[index]['geolocation'].latitude, data[index]['geolocation'].longitude),
                           )
                         ],
                       ),
@@ -187,20 +191,21 @@ class _AddressPageState extends State<AddressPage> {
           title: Text('Delete Address'),
           content: Text('Are you sure you want to delete this address?'),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text('Cancel',style: TextStyle(color: Color(0xff5458e1)),),
               onPressed: () {
                 Navigator.of(context,rootNavigator: true).pop();
               },
             ),
-            FlatButton(
+            TextButton(
               child: Text('Yes',style: TextStyle(color: Color(0xff5458e1))),
 
               onPressed: ()async {
                 await DataService().deleteAddress(data['address'], data['city'], data['state'], data['country'],
                   data['pincode'], data['phone'], data['person_name'], data['landmark'], data['id'], addressListLength).then((value){
 
-                    _globalKey.currentState.showSnackBar(
+                    ScaffoldMessenger.of(context).showSnackBar(
+
                       SnackBar(
                         content: value == 'success' ?  Text('Address deleted successfully') : Text('Some error occured')
                       )

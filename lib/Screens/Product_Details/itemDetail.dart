@@ -15,7 +15,7 @@ class ItemDetail extends StatefulWidget {
 
  final productId ;
 
-  ItemDetail({Key key, this.productId }) : super(key: key);
+  ItemDetail({this.productId });
 
    @override
   _ItemDetailState createState() => _ItemDetailState();
@@ -23,8 +23,8 @@ class ItemDetail extends StatefulWidget {
 
 class _ItemDetailState extends State<ItemDetail> {
 
-  String status ;
-  int productListLength;
+  late String status ;
+  late int productListLength;
   
   @override
   Widget build(BuildContext context){ 
@@ -51,11 +51,11 @@ class _ItemDetailState extends State<ItemDetail> {
 
   Widget itemDetails(){
 
-    List addressData = Provider.of<DataModel>(context).getAddressData();
+    List? addressData = Provider.of<DataModel>(context).getAddressData();
     var data = Provider.of<DataModel>(context).getProductsData();
 
     //to check before deleting whether this is last product of list or not
-    List productIdList = data['products'] ?? null;
+    List? productIdList = data['products'] ?? null;
     productListLength = productIdList != null ?  productIdList.length : 0;
     
     
@@ -67,119 +67,117 @@ class _ItemDetailState extends State<ItemDetail> {
         DateTime date = DateTime.now();
         var format = DateFormat('dd/MM/yyyy'); 
 
-        String formattedExpiryDate = result != null ? format.format(result["expiry"].toDate()) : null;
+        String formattedExpiryDate = format.format(result["expiry"].toDate());
 
-        String formattedPurchaseDate = result != null ? format.format(result["purchase"].toDate()) : null;
+        String formattedPurchaseDate = format.format(result["purchase"].toDate());
                       
-        if(result !=null){
-          if(date.isBefore(result["expiry"].toDate())){
-            status = 'Active';
-          }else{ 
-            status ='Expired';
-          }
+        
+        if(date.isBefore(result["expiry"].toDate())){
+          status = 'Active';
+        }else{ 
+          status ='Expired';
         }
+      
 
-        return result != null
-          ? Container(
-              child: Column(
-              children: <Widget>[
+        return Container(
+          child: Column(
+            children: <Widget>[
 
-                result['image'] != null 
-                  ? CarouselSlider(
-                    options: CarouselOptions(
-                      height: 250, autoPlay: true,
-                      viewportFraction: 0.65, 
-                      autoPlayInterval: Duration(seconds: 4), 
-                      autoPlayCurve: Curves.decelerate,
-                      pauseAutoPlayOnTouch: true,
-                      enlargeCenterPage: true,
-                    ),
+              result['image'] != null 
+                ? CarouselSlider(
+                  options: CarouselOptions(
+                    height: 250, autoPlay: true,
+                    viewportFraction: 0.65, 
+                    autoPlayInterval: Duration(seconds: 4), 
+                    autoPlayCurve: Curves.decelerate,
+                    pauseAutoPlayOnTouch: true,
+                    enlargeCenterPage: true,
+                  ),
 
-                    items: List.generate(
-                      result['image'].length, (index){ 
+                  items: List.generate(
+                    result['image'].length, (index){ 
 
-                        return Card(
-                          color: Colors.white,
-                          elevation: 8, 
-                          child: Padding( 
-                            padding: const EdgeInsets.all(3.0),
-                            child: Container(
-                              height: 30,width: 200,
-                              child: InkWell(
-                                child: Image.network( 
-                                  result['image'][index],fit:BoxFit.fitWidth,
-                                  loadingBuilder: (context, child, loadingProgress){
-                                    return loadingProgress == null 
-                                    ? child 
-                                    : Center(
-                                      child: CircularProgressIndicator(
-                                        value: loadingProgress.expectedTotalBytes != null 
-                                        ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes : null
-                                      ),
-                                    );
-                                  },
-                                ),
-                                onTap: () => Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (context) => Preview(result['name'], null, 'image', result['image'][index]))),
-                              )
-                            ),
+                      return Card(
+                        color: Colors.white,
+                        elevation: 8, 
+                        child: Padding( 
+                          padding: const EdgeInsets.all(3.0),
+                          child: Container(
+                            height: 30,width: 200,
+                            child: InkWell(
+                              child: Image.network( 
+                                result['image'][index],fit:BoxFit.fitWidth,
+                                loadingBuilder: (context, child, loadingProgress){
+                                  return loadingProgress == null 
+                                  ? child 
+                                  : Center(
+                                    child: CircularProgressIndicator(
+                                      value: loadingProgress.expectedTotalBytes != null 
+                                      ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes! : null
+                                    ),
+                                  );
+                                },
+                              ),
+                              onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(builder: (context) => Preview(result['name'], null, 'image', result['image'][index]))),
+                            )
                           ),
-                        );
+                        ),
+                      );
+                    }
+                  )
+                )
+              : Padding(
+                padding: const EdgeInsets.all(10),
+                child: Container(
+                  height: 200,width: 200,
+                  child: InkWell(
+                    child: Image.asset('lib/images/noimage.jpg')
+                  ) 
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.only(top:5.0,bottom: 3), 
+                child: Chip(
+                  // shape: RoundedRectangleBorder(side: BorderSide(color: Colors.green),borderRadius: BorderRadius.circular(20)), 
+                  label: Text(
+                    status, style: TextStyle(
+                    fontSize: 16,fontWeight: FontWeight.bold,
+                    color: status == 'Active' ? Colors.green : Colors.red
+                  )),  
+                  
+                  backgroundColor: status == 'Active' ? Colors.green[100] : Colors.red[100], 
+                )
+              ), 
+              
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                child: Card(
+                  elevation: 4,
+                  child: ListTile(
+                    leading: Icon(Icons.receipt),
+                    title: Text('Product Receipts',
+                      style: TextStyle(fontSize: 15),),
+                    onTap:() =>
+                      WidgetsBinding.instance!.addPostFrameCallback((_) async {
+                          
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (BuildContext context) => Receipt(productid: widget.productId,)));
                       }
                     )
-                  )
-                : Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Container(
-                    height: 200,width: 200,
-                    child: InkWell(
-                      child: Image.asset('lib/images/noimage.jpg')
-                    ) 
                   ),
                 ),
+              ),
+              
+              productHighlightsCard(result, formattedPurchaseDate, formattedExpiryDate),
+              productDetailsCard(result),
+              retailerCard(result),
+              addressCard(addressData, result['address_id'])
 
-                Padding(
-                  padding: const EdgeInsets.only(top:5.0,bottom: 3), 
-                  child: Chip(
-                    // shape: RoundedRectangleBorder(side: BorderSide(color: Colors.green),borderRadius: BorderRadius.circular(20)), 
-                    label: Text(
-                      status, style: TextStyle(
-                      fontSize: 16,fontWeight: FontWeight.bold,
-                      color: status == 'Active' ? Colors.green : Colors.red
-                    )),  
-                    
-                    backgroundColor: status == 'Active' ? Colors.green[100] : Colors.red[100], 
-                  )
-                ), 
-                
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                  child: Card(
-                    elevation: 4,
-                    child: ListTile(
-                      leading: Icon(Icons.receipt),
-                      title: Text('Product Receipts',
-                        style: TextStyle(fontSize: 15),),
-                      onTap:() =>
-                        WidgetsBinding.instance.addPostFrameCallback((_) async {
-                            
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (BuildContext context) => Receipt(productid: widget.productId,)));
-                        }
-                      )
-                    ),
-                  ),
-                ),
-                
-                productHighlightsCard(result, formattedPurchaseDate, formattedExpiryDate),
-                productDetailsCard(result),
-                retailerCard(result),
-                addressCard(addressData, result['address_id'])
-
-              ],
-            ),
-          )
-        : Container();
+            ],
+          ),
+        );
       }
     );
   }
@@ -306,10 +304,10 @@ class _ItemDetailState extends State<ItemDetail> {
     );
   }
 
-  Widget addressCard(List data, String addId){
+  Widget addressCard(List? data, String addId){
 
     // show only that address which have this id
-    List result = data != null ? data.where((e) => e['id'] == addId).toList() : null; 
+    List? result = data != null ? data.where((e) => e['id'] == addId).toList() : null; 
     
     return Padding( 
       padding: EdgeInsets.all(8),
@@ -410,13 +408,13 @@ class _ItemDetailState extends State<ItemDetail> {
           title: Text('Delete Item'),
           content: Text('Are you sure you want to delete this product?'),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text('Cancel',style: TextStyle(color: Color(0xff5458e1)),),
               onPressed: () {
                 Navigator.of(context,rootNavigator: true).pop();
               },
             ),
-            FlatButton(
+            TextButton(
               child: Text('Yes',style: TextStyle(color: Color(0xff5458e1)),),
               onPressed: ()async {
                 var result = await DataService().deleteProducts(productId, productListLength);
@@ -431,9 +429,9 @@ class _ItemDetailState extends State<ItemDetail> {
     ); 
   }
 
-  Future updateAddress(List data){
+  Future updateAddress(List? data){
 
-    String addressId;
+    late String addressId;
 
     return showModalBottomSheet(
       context: context,
@@ -479,7 +477,7 @@ class _ItemDetailState extends State<ItemDetail> {
 
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 17, 12, 17),
-                child: DropdownButtonFormField(
+                child: DropdownButtonFormField<dynamic>(
                   items: dropdownitems,
                   hint: Text('Select an addresses'),
                   onChanged: (val){
@@ -493,8 +491,10 @@ class _ItemDetailState extends State<ItemDetail> {
 
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: RaisedButton(
-                  color: Color(0xff5458e1), 
+                child: ElevatedButton(
+                  style:ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Color(0xff5458e1))
+                  ),
                   onPressed: () => DataService().updateAddress(addressId, widget.productId).then((value) => Navigator.of(context).pop()),
                   child: Text('Update details'),
                 ),

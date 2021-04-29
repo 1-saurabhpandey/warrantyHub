@@ -77,12 +77,11 @@ class _OnboardState extends State<Onboard> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-          FlatButton(
+          TextButton(
             onPressed: (){
               _pageController.animateToPage(3, duration: Duration(milliseconds: 400), curve: Curves.linear);
               setState(() {});     
             },
-            splashColor: Colors.deepPurpleAccent,
             child: Text('SKIP'),
           ),
 
@@ -97,12 +96,11 @@ class _OnboardState extends State<Onboard> {
             ),
           ),
 
-          FlatButton(
+          TextButton(
             onPressed: (){
               _pageController.animateToPage(_currentPage + 1 , duration: Duration(milliseconds: 400), curve: Curves.linear);
               setState((){});
             },
-            splashColor: Colors.deepPurpleAccent,
             child: Container(
               padding: EdgeInsets.fromLTRB(35,15,35,15), 
               decoration: BoxDecoration(
@@ -115,8 +113,10 @@ class _OnboardState extends State<Onboard> {
       ),
     ) 
       
-      : FlatButton(
-        color: Colors.white,
+      : TextButton(
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all(Colors.white)
+        ),
         onPressed: () =>
         Navigator.pushReplacement(
           context, MaterialPageRoute(
@@ -147,8 +147,8 @@ class _OnboardState extends State<Onboard> {
   }
       
   Widget pageContent({
-    String image , 
-    String title , 
+    required String image , 
+    required String title , 
   }){
     return Container(
       padding: EdgeInsets.symmetric(horizontal:22),

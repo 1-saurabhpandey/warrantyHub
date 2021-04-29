@@ -10,7 +10,7 @@ Future alertWidget(BuildContext context, String alertMessage){
           title: Text('Sorry...'),
           content: Text(alertMessage),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text('OK'),
               onPressed: () {
                 Navigator.of(context).pop();

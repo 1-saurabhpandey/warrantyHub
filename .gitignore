@@ -38,6 +38,10 @@
 **/android/gradlew.bat
 **/android/local.properties
 **/android/key.properties
+**/android/build.gradle
+**/android/app/build.gradle
+**/android/app/google-services.json
+**/android/app/src/main/AndroidManifest.xml
 **/android/app/FlutterKey/key.jks
 **/android/**/GeneratedPluginRegistrant.java
 

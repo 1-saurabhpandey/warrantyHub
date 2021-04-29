@@ -14,7 +14,7 @@ description: A new Flutter project.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -23,22 +23,26 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.0
-  google_fonts:
-  firebase_auth:
-  google_sign_in:
-  cloud_firestore:
-  intl:
-  datetime_picker_formfield: ^1.0.0
-  firebase_storage:
-  flutter_plugin_pdf_viewer:
-  url_launcher:
-  wc_flutter_share:
-  shared_preferences:
-  avatar_glow:
-  provider:
-  file_picker:
-  firebase_core: 
-  carousel_slider:
+  google_fonts: ^2.0.0
+  firebase_auth: ^1.1.2
+  google_sign_in: ^5.0.2
+  cloud_firestore: ^1.0.7
+  intl: ^0.17.0
+  datetime_picker_formfield: ^2.0.0
+  firebase_storage: ^8.0.5
+  url_launcher: ^6.0.3
+  flutter_cached_pdfview: ^0.4.0-nullsafety
+  share: ^2.0.1
+  shared_preferences: ^2.0.5
+  avatar_glow: ^2.0.1
+  provider: ^5.0.0
+  file_picker: ^3.0.1
+  firebase_core: ^1.1.0
+  carousel_slider: ^4.0.0-nullsafety.0
+  google_maps_flutter: ^2.0.3
+  google_maps_place_picker: ^2.0.0-nullsafety.3
+  geocoder: ^0.2.1
+  geolocator: ^7.0.3
   
   
   
@@ -73,8 +77,9 @@ flutter:
   - lib/images/onboard/upload.png
   - lib/images/logo/dark.jpg
   - lib/images/logo/logo.jpg
-  - lib/images/logo/map.png 
-  - lib/images/logo/map2.png 
+  - lib/images/map.png 
+  - lib/images/mapicon.png 
+
   
 
   # An image asset can refer to one or more resolution-specific "variants", see

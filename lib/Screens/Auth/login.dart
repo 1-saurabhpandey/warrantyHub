@@ -26,7 +26,7 @@ class Login extends StatelessWidget {
               Container(
                 alignment: Alignment.topCenter,
                 child: AvatarGlow(
-                  glowColor: Colors.deepPurple[900],
+                  glowColor: Colors.deepPurple[900]!,
                   endRadius: 80,
                   child: Material(
                     elevation: 8,
@@ -77,7 +77,7 @@ class Login extends StatelessWidget {
                       dynamic result = AuthService().signInGoogle();
                             
                     if (result == null) {
-                      Scaffold.of(context).showSnackBar(
+                      ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text('Some error occured'),
                         )

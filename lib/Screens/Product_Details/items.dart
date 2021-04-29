@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:warranty_tracker/Model/dataModel.dart';
+import 'package:warranty_tracker/Model/productsModel.dart';
 import 'package:warranty_tracker/Screens/Product_Details/addItem.dart';
 import 'package:warranty_tracker/Screens/Product_Details/itemDetail.dart';
 import 'package:warranty_tracker/Services/database.dart';
@@ -17,11 +18,12 @@ class _ItemsState extends State<Items> {
 
   final GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
 
-  String status;
-  int difference ;
-  String timeLeft ;
-  String purchaseDate;
-  List productsIdList;
+  late String status;
+  late int difference ;
+  late String timeLeft ;
+  late String purchaseDate;
+  late List? productsIdList;
+  List<Map>? data;
 
   var stream;
   List catman = []; 
@@ -31,6 +33,7 @@ class _ItemsState extends State<Items> {
     super.initState();
     stream = DataService().getData();
     catmanStream();
+    
   }
   
   void catmanStream(){
@@ -44,6 +47,7 @@ class _ItemsState extends State<Items> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       key: _globalKey,
       floatingActionButton: FloatingActionButton(
@@ -59,7 +63,7 @@ class _ItemsState extends State<Items> {
           MaterialPageRoute(builder:(BuildContext context) => AddItem(productsIdList: productsIdList,)));
           
           if(result != null){
-            _globalKey.currentState 
+            ScaffoldMessenger.of(context) 
             .showSnackBar(
               SnackBar(
                 content: result == 'success'  ? Text('New product added successfully') : Text('Some error occured'),
@@ -81,36 +85,46 @@ class _ItemsState extends State<Items> {
   }
 
   Widget listData(){  
-    return StreamBuilder(
+
+    return StreamBuilder<dynamic>(
 
       stream: stream,
       builder: (BuildContext context,snapshot){
 
-        if(snapshot.connectionState == ConnectionState.waiting){
-          return Center(child: Text("Loading..."),);
-        }
-
+        if(snapshot.connectionState == ConnectionState.waiting){ 
+          return Center(child: Text("Loading..."),); 
+        } 
+        
+         
         if(snapshot.data != null){
-          try{
-            productsIdList = snapshot.data["products"] == null ? null : snapshot.data["products"];
-            WidgetsBinding.instance.addPostFrameCallback((_){ 
-              Provider.of<DataModel>(context,listen:false).setProductsData(snapshot.data);
-              Provider.of<DataModel>(context,listen:false).setAddressData(snapshot.data["addresses"]);
-            });
-  
-            return productsIdList != null ? ListView.builder(
 
-              itemCount: productsIdList.length,
+          Provider.of<ProductsModel>(context,listen: false).setProductIdList(snapshot.data?.docs);
+          //giving error setstate or markNeedsBuild called during build
+          // print(data[0].keys); // productId
+          
+        
+          try{ 
+
+            // productsIdList = snapshot.data["products"] == null ? null : snapshot.data["products"];  
+            // WidgetsBinding.instance.addPostFrameCallback((_){                                              \
+            //   Provider.of<DataModel>(context,listen:false).setProductsData(snapshot.data);                  \
+            //   // Provider.of<DataModel>(context,listen:false).setAddressData(snapshot.data["addresses"]);   /    Building continuously
+            // });                                                                                            /
+
+            return productsIdList != null ? ListView.builder(
+              
+              itemCount: productsIdList?.length,
               itemBuilder: (context,index){
 
-                var productId = productsIdList[index]; 
-                Map products = snapshot.data[productId];
+                
+                var productId = productsIdList?[index]; 
+                Map products = snapshot.data?[productId];
 
                 DateTime date = DateTime.now();
                 DateTime expiryDate = products["expiry"].toDate();
-
-                //changing the format of expirydate
-
+  
+                //changing the format of expirydate 
+ 
                 var format = DateFormat('dd/MM/yyyy');
                 String date2 = format.format(expiryDate);
 
@@ -142,7 +156,7 @@ class _ItemsState extends State<Items> {
                         ));
 
                         if(result != null){
-                          _globalKey.currentState 
+                          ScaffoldMessenger.of(context)
                           .showSnackBar(
                             SnackBar(
                               content: result == 'success'  ? Text('Product deleted successfully') : Text('Some error occured'),
@@ -171,7 +185,7 @@ class _ItemsState extends State<Items> {
                                       ? child 
                                       : CircularProgressIndicator(
                                         value: loadingProgress.expectedTotalBytes != null 
-                                        ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes : null
+                                        ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes! : null
                                       );
                                     },
                                   )

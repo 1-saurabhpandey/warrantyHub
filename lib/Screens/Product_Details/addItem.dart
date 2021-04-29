@@ -17,7 +17,7 @@ import 'package:warranty_tracker/Services/database.dart';
 class AddItem extends StatefulWidget {
 
   final productsIdList;
-  const AddItem({Key key, @required this.productsIdList}) : super(key: key);
+  const AddItem({@required this.productsIdList});
   
   @override
   _AddItemState createState() => _AddItemState();
@@ -38,15 +38,15 @@ class _AddItemState extends State<AddItem> {
   TextEditingController manufacturercon = TextEditingController();
   TextEditingController categorycon = TextEditingController();
 
-  DateTime purchase ;
-  DateTime expiry ;
-  String address;
+  late DateTime purchase ;
+  late DateTime expiry ;
+  late String address;
 
   var fileimg;
-  String fileimgname;
+  String? fileimgname;
   var filedoc;
-  String filedocname;
-  String finaltype;
+  String? filedocname;
+  String? finaltype;
   
   var catmanStream; 
   List<String> imageList = [];
@@ -68,12 +68,15 @@ class _AddItemState extends State<AddItem> {
         Container(
           child: Theme(
             data: ThemeData(
-              textSelectionColor: Color(0xff5458e1),
-              textSelectionHandleColor: Color(0xff5458e1),
+              textSelectionTheme: TextSelectionThemeData(
+                selectionColor: Color(0xff5458e1),
+                selectionHandleColor: Color(0xff5458e1),
+                cursorColor: Color(0xff5458e1)
+              ),
+              
               accentColor: Color(0xff5458e1),
               primaryColor: Color(0xff5458e1),
               colorScheme: ColorScheme.light(primary: const Color(0xff5458e1)),
-              cursorColor: Color(0xff5458e1),
               buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary)
             ),
             child: Form(
@@ -156,10 +159,10 @@ class _AddItemState extends State<AddItem> {
                       padding: const EdgeInsets.only(top:40.0,left: 30,right: 30,bottom: 15),
                       child: Container(
                         width: 250,
-                        child: RaisedButton(
+                        child: ElevatedButton(
                           onPressed: () async {
  
-                            if(_formKey1.currentState.validate()){ 
+                            if(_formKey1.currentState!.validate()){ 
 
                               showDialog(
                                 barrierDismissible: false,
@@ -174,7 +177,7 @@ class _AddItemState extends State<AddItem> {
                                           child: Row(
                                             children: [
                                               CircularProgressIndicator(),
-                                              SizedBox(width:10),
+                                              SizedBox(width:30),
                                               Text('Uploading...'),
                                             ],
                                           ),
@@ -199,9 +202,11 @@ class _AddItemState extends State<AddItem> {
                             margin: EdgeInsets.all(8), 
                             padding : EdgeInsets.all(8), 
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.all(Radius.circular(60))), 
+                              borderRadius: BorderRadius.all(Radius.circular(60)),
+                              color: Color(0xff5458e1),
+                            ), 
                             child: Text('Save',style: TextStyle(color: Colors.white))),
-                          color: Color(0xff5458e1),
+                          
                         ),
                       ),
                     )                  
@@ -227,7 +232,7 @@ class _AddItemState extends State<AddItem> {
     );
   }
 
-  Widget commonFields(String label, String validator, TextEditingController controller){
+  Widget commonFields(String label, String? validator, TextEditingController controller){
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(30, 10, 30, 15),
@@ -236,8 +241,8 @@ class _AddItemState extends State<AddItem> {
         textInputAction: label == "Retailer address" ? TextInputAction.done : TextInputAction.next,
         decoration: InputDecoration(
           labelText: label),
-        validator: (String val ){
-          return val.isEmpty ? validator : null;
+        validator: (val ){
+          return val!.isEmpty ? validator : null;
         },
       ),
     );
@@ -259,15 +264,15 @@ class _AddItemState extends State<AddItem> {
           return showDatePicker(
             context: context,
             firstDate: DateTime(1900),
-            initialDate: currentValue ?? DateTime.now(),
+            initialDate: currentValue! ,
             lastDate: DateTime(2100));
         },
 
-        validator: (val){
+        validator: ( val){
            return val == null ? 'Please enter $type date' : null;
         },
         onChanged: (val){
-          type == 'expiry' ? expiry = val : purchase = val;
+          type == 'expiry' ? expiry = val! : purchase = val!;
         },
       ),
     );
@@ -279,12 +284,12 @@ class _AddItemState extends State<AddItem> {
  
     var stream = type == 'Category' ? catmanStream[0] : catmanStream[1]; 
 
-    return FutureBuilder(
+    return FutureBuilder<QuerySnapshot>(
       future: stream,
       builder: (context,snap){
         if(snap.hasData){
 
-          List result = type == 'Category' ? snap.data.documents[0]['categories'] : snap.data.documents[0]['manufacturers'];
+          List result = type == 'Category' ? snap.data?.docs[0]['categories'] : snap.data?.docs[0]['manufacturers'];
 
           for(int i = 0; i< result.length; i++){
             dataList.add(result[i]['name']);
@@ -299,7 +304,7 @@ class _AddItemState extends State<AddItem> {
               decoration: InputDecoration(
                 labelText: type
               ),
-              validator: (val) => val.isEmpty ? 'Please Enter $type' : null,
+              validator: (val) => val!.isEmpty ? 'Please Enter $type' : null,
               onTap:  ()async{
                 var result = await showSearch(context: context, delegate: SearchList(dataList,type));
                 type == 'Category' ? categorycon.text = result : manufacturercon.text = result; 
@@ -314,7 +319,7 @@ class _AddItemState extends State<AddItem> {
   }
 
   Widget addressDropdown(){
-    List addressData = Provider.of<DataModel>(context).getAddressData();
+    List? addressData = Provider.of<DataModel>(context).getAddressData();
     List<DropdownMenuItem> dropdownItems = [];
 
     dropdownItems.add(
@@ -339,7 +344,7 @@ class _AddItemState extends State<AddItem> {
       }
     }
 
-    return DropdownButtonFormField(
+    return DropdownButtonFormField<dynamic>(
       items: dropdownItems,
       isDense: true,
       hint: Text('Select a address'),
@@ -370,11 +375,11 @@ class _AddItemState extends State<AddItem> {
 
           String fileType = fileList[index].split('.').last;
           String fileName = fileList[index].split('/').last.split('.').first; 
-          double size = num.parse((File(fileList[index]).lengthSync() / 1000).toStringAsFixed(1)) ;
+          double size = num.parse((File(fileList[index]).lengthSync() / 1000).toStringAsFixed(1)).toDouble() ;
           String sizeType;
 
           if(size > 1000){
-            size = num.parse((size / 1000).toStringAsFixed(1)); 
+            size = num.parse((size / 1000).toStringAsFixed(1)).toDouble(); 
             sizeType = 'MB';
           } 
           else{ 
@@ -409,11 +414,11 @@ class _AddItemState extends State<AddItem> {
 
   Future filePicker(BuildContext context,String fileType) async {
 
-    List<String> overSizedFiles = [];
+    List<String?> overSizedFiles = [];
 
     if (fileType == 'image') {
 
-      FilePickerResult imageFiles = await FilePicker.platform.pickFiles(type: FileType.image, allowMultiple: true);
+      FilePickerResult? imageFiles = await FilePicker.platform.pickFiles(type: FileType.image, allowMultiple: true);
 
       if(imageFiles != null){
         if(imageFiles.count > 5 || imageList.length == 5){
@@ -423,7 +428,7 @@ class _AddItemState extends State<AddItem> {
         if(imageFiles.count <= 5){
           for(int i = 0; i < imageFiles.count; i++){
 
-            if(imageFiles.files[i].size > 5000){
+            if(imageFiles.files[i].size! > 5000){
               overSizedFiles.add(imageFiles.files[i].name); 
             } 
             else if(imageList.length < 5){
@@ -440,7 +445,7 @@ class _AddItemState extends State<AddItem> {
 
     if (fileType == 'bill') {
 
-      FilePickerResult filedoc = await FilePicker.platform.pickFiles( 
+      FilePickerResult? filedoc = await FilePicker.platform.pickFiles( 
         type: FileType.custom, allowedExtensions: ['pdf','jpg','jpeg','png'],
         allowMultiple: true
       );
@@ -453,7 +458,7 @@ class _AddItemState extends State<AddItem> {
         if(filedoc.count <= 5){
           for(int i = 0; i < filedoc.count; i++){
  
-            if(filedoc.files[i].size > 5000){
+            if(filedoc.files[i].size! > 5000){
               overSizedFiles.add(filedoc.files[i].name); 
             } 
             if(billList.length < 5){

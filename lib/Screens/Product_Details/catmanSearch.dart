@@ -7,7 +7,7 @@ class SearchList extends SearchDelegate{
   SearchList(this.dataList,this.type);
 
   var formkey = GlobalKey<FormState>();
-  String name;
+  late String name;
 
   TextEditingController nameCon = TextEditingController();
 
@@ -90,16 +90,18 @@ class SearchList extends SearchDelegate{
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(5))),),
 
-                      validator: (String val) => val.isEmpty ? 'Enter $type name' : null,
+                      validator: (val) => val!.isEmpty ? 'Enter $type name' : null,
                       onChanged: (val) => name = val
                       
                     ),),
                 
-                RaisedButton(
+                ElevatedButton(
                   child: Text('Add',style: TextStyle(color: Colors.white),),
-                  color: Color(0xff2a81ea),
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Color(0xff2a81ea))
+                  ) ,
                   onPressed: () async{
-                    if(formkey.currentState.validate()){
+                    if(formkey.currentState!.validate()){
                     //  dynamic result = await DataService().addCategory(catname);
                     
                     Navigator.of(context).pop();

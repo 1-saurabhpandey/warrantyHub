@@ -3,8 +3,8 @@ import 'package:flutter/cupertino.dart';
 class DataModel extends ChangeNotifier{
   
   var productsData;
-  List addressData;
-  List catmanStream;
+  List? addressData;
+  List? catmanStream;
   List<String> imageDataList = [];
   List<String> billDataList = [];
 
@@ -22,7 +22,7 @@ class DataModel extends ChangeNotifier{
     notifyListeners();
   }
 
-  List getAddressData(){
+  List? getAddressData(){
     return addressData;
   }
 
