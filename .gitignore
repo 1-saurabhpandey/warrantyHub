@@ -40,7 +40,7 @@
 **/android/key.properties
 **/android/app/FlutterKey/key.jks
 **/android/app/google-services.json
-**/android/app/src/main/AndroidManifest.xml
+**/android/app/src/main/AndroidManifest.xml 
 **/android/**/GeneratedPluginRegistrant.java
 
 # Web related
