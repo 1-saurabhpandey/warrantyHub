@@ -88,7 +88,9 @@ class SearchList extends SearchDelegate{
                       InputDecoration(
                         labelText: '$type name', 
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(5))),),
+                          borderRadius: BorderRadius.all(Radius.circular(5))
+                        ),
+                      ),
 
                       validator: (val) => val!.isEmpty ? 'Enter $type name' : null,
                       onChanged: (val) => name = val
@@ -98,14 +100,12 @@ class SearchList extends SearchDelegate{
                 ElevatedButton(
                   child: Text('Add',style: TextStyle(color: Colors.white),),
                   style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Color(0xff2a81ea))
+                    backgroundColor: MaterialStateProperty.all(Color(0xff5458e1))
                   ) ,
                   onPressed: () async{
                     if(formkey.currentState!.validate()){
-                    //  dynamic result = await DataService().addCategory(catname);
-                    
-                    Navigator.of(context).pop();
-                  }
+                      close(context,name);
+                    }
                 },
               )
             ]

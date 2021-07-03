@@ -16,7 +16,8 @@ class Preview extends StatelessWidget {
     
     return Scaffold(
       appBar: AppBar(
-        title:Text(fileName)
+        title:Text(fileName),
+        backgroundColor: Color(0xff5458e1)
       ),
       body: Container(
         child: Center(

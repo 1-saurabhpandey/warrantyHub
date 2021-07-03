@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:geocoder/geocoder.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
  
@@ -17,11 +17,11 @@ class MapsPage extends StatefulWidget {
 class _MapsPageState extends State<MapsPage> {
   
   late GoogleMapController controller;
-  late Set<Marker> listMarkers = Set<Marker>();
+  Set<Marker> listMarkers = Set<Marker>();
   late BitmapDescriptor markerIcon;
   late String address;
-  late MapType maptype = MapType.normal;
-  late CameraPosition? initialPosition ;
+  MapType maptype = MapType.normal;
+  var initialPosition;
    
 
   @override
@@ -36,64 +36,60 @@ class _MapsPageState extends State<MapsPage> {
  
   void onMapCreated(GoogleMapController con,){
     controller = con; 
-    addMarkers(Coordinates(initialPosition?.target.latitude, initialPosition?.target.longitude));
+    addMarkers(initialPosition.target.latitude, initialPosition.target.longitude);
   }
     
-   getCurrentLocation(){    
+   getCurrentLocation(){
      Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high).then((value){
       setState(() {  
         initialPosition = CameraPosition(target: LatLng(value.latitude,value.longitude),zoom: 17);
       });
       }
     ).catchError((onError){
-      alertBox(context, 'Location Permission is Denied,Please allow it in the Settings');
+      alertBox(context, 'Location permission is denied, please allow it in the settings');
+      setState(() {  
+        initialPosition = CameraPosition(target: LatLng(28.7041,77.1025),zoom: 17);
+      });
     });
   }
 
   void search(BuildContext context){
     
-      Geocoder.local.findAddressesFromQuery(address).then((value){
+    GeocodingPlatform.instance.locationFromAddress(address).then((value){
         controller. animateCamera(CameraUpdate.newCameraPosition(
         CameraPosition(
-          target: LatLng(value[0].coordinates.latitude, value[0].coordinates.longitude),
+          target: LatLng(value[0].latitude, value[0].longitude),
           zoom: 17
         )
       ));
     }
     ).catchError((onError){
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Location Not Found'),
-        )
-      );
+      Get.snackbar('', 'Location not found',duration: Duration(seconds: 3));
     });
       
-    
   }
-  void addMarkers(Coordinates c){
+  void addMarkers(double lat, double long){
     setState(() {
       listMarkers.add(
         Marker(
           markerId: MarkerId('Mark'),
           draggable: true,
-          position: LatLng(c.latitude,c.longitude),
+          position: LatLng(lat,long),
           icon: markerIcon,
-          onTap:() => markerDetails(c)
+          onTap:() => markerDetails(lat,long)
         )
       );
     });
-    markerDetails(c);
+    markerDetails(lat,long);
   }
 
-  void markerDetails(Coordinates c){
-
-    Geocoder.local.findAddressesFromCoordinates(c).then((value){
-      return showModalBottomSheet(
-        context: context, 
-        builder: (context){
-          return Container( 
+  void markerDetails(double lat, double long){
+   
+     GeocodingPlatform.instance.placemarkFromCoordinates(lat, long).then((value){
+      Get.bottomSheet(
+        Container( 
           height: 220,
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -114,10 +110,13 @@ class _MapsPageState extends State<MapsPage> {
                 child: Container(
                   width: MediaQuery.of(context).size.width,
                   child: Text(
-                    value[0].addressLine,
+                    value[0].name! + ', ' + value[0].locality! + ', ' 
+                    + value[0].subAdministrativeArea! + ', ' + value[0].postalCode! + ', ' +
+                    value[0].administrativeArea! + ', ' + value[0].country!,
                     style: TextStyle(
-                      fontSize: 20
-                    ),),
+                      fontSize: 20 
+                    ),
+                  ),
                 ),
               ), 
 
@@ -129,58 +128,57 @@ class _MapsPageState extends State<MapsPage> {
                     backgroundColor: MaterialStateProperty.all(Color(0xff5458e1))
                   ) ,
                   onPressed: (){
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pop(value[0]);
+                    Get.back();
+                    Get.back(result: value[0]);
+                    
                   },
                 ),
               )
             ],
           ),
-        );
-      });
+        )
+      );
     });
   }
 
-  Future alertBox(BuildContext context, String alertMessage){
+  alertBox(BuildContext context, String alertMessage){
    
-    return  showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))), 
-          title: Text('Oops...'),
-          content: Text(alertMessage),
-          actions: <Widget>[
-            TextButton(
-              child: Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-            )
-          ],
-        );
-      }
-    ); 
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: Theme.of(context).cardColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))), 
+        title: Text('Oops...'),
+        content: Text(alertMessage),
+        actions: <Widget>[
+          TextButton(
+            child: Text('OK'),
+            onPressed: () {
+              Get.back();
+            },
+          )
+        ],
+      )
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: initialPosition != null ? Stack(  
+        child: Stack(  
           children: [ 
              
-            GoogleMap( 
+            
+            initialPosition != null ? GoogleMap( 
               onMapCreated: onMapCreated,   
-              initialCameraPosition: initialPosition! ,  
+              initialCameraPosition: initialPosition ,  
               onTap: (value){
-                addMarkers(Coordinates(value.latitude, value.longitude));  
+                addMarkers(value.latitude, value.longitude);  
               },
               markers: listMarkers,
               zoomControlsEnabled: false,    
               mapType: maptype, 
-            ),
+            ) : Center(child: Container(child: CircularProgressIndicator())),
 
             Align(
               alignment: Alignment.topCenter,
@@ -197,7 +195,7 @@ class _MapsPageState extends State<MapsPage> {
                     
                     leading: IconButton(
                       icon: Icon(Icons.arrow_back),
-                      onPressed: () => Navigator.of(context).pop()),
+                      onPressed: () => Get.back()),
                     
                     title: TextFormField(
                       textInputAction: TextInputAction.search,
@@ -221,51 +219,54 @@ class _MapsPageState extends State<MapsPage> {
               ),
             ), 
           ],
-        ) : Container(child: Center(child: CircularProgressIndicator(),),)
+        ) 
       ),
 
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Card(
-            elevation: 7,color: Color(0xff5458e1),
-            shape: RoundedRectangleBorder( 
-              borderRadius: BorderRadius.circular(50)
-            ),
-            child: Container(
-              height: 55,width: 55, 
-              child: IconButton(
-                icon: Icon(Icons.map,color: Colors.white,), 
-                tooltip: 'Change Map Type',
-                onPressed: (){
-                  setState(() {
-                    maptype = maptype == MapType.normal ? MapType.satellite : MapType.normal;
-                  });
-                  
-                },
-              )
+
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FloatingActionButton(
+              backgroundColor: Color(0xff5458e1),
+              elevation: 7,
+              shape: RoundedRectangleBorder( 
+                borderRadius: BorderRadius.circular(5)
+              ),
+              child: Icon(Icons.map,color: Colors.white,),
+              tooltip: 'Change Map Type',
+              onPressed: (){
+                setState(() {
+                  maptype = maptype == MapType.normal ? MapType.satellite : MapType.normal;
+                });
+                
+              },
             ),
           ),
-          Card(
-            elevation: 7,color: Color(0xff5458e1),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(50)
-            ),
-            child: Container(
-              height: 55,width: 55,
-              child: IconButton(
-                icon: Icon(Icons.my_location,color: Colors.white),
-                tooltip: 'My Location',
-                onPressed: (){
-                  controller.animateCamera(
-                    CameraUpdate.newCameraPosition(
-                      initialPosition!
-                    )
-                  );
+          
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FloatingActionButton(
+              backgroundColor: Color(0xff5458e1),
+              elevation: 7,
+              shape: RoundedRectangleBorder( 
+                borderRadius: BorderRadius.circular(5)
+              ),
+              child: Icon(Icons.my_location,color: Colors.white),
+              tooltip: 'My Location',
+              onPressed: (){
+                if(initialPosition == CameraPosition(target: LatLng(28.7041,77.1025),zoom: 17)){
+                  alertBox(context, 'Location permission is denied, please allow it in the settings');
                 }
-              )
+                controller.animateCamera(
+                  CameraUpdate.newCameraPosition(
+                    initialPosition
+                  )
+                );
+              }
             ),
-          )
+          ),
         ],
       ),
     );

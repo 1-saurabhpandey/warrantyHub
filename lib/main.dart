@@ -1,16 +1,38 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:warranty_tracker/Model/dataModel.dart';
-import 'package:warranty_tracker/Model/productsModel.dart';
-import 'package:warranty_tracker/Screens/Auth/homepage.dart';
-import 'package:warranty_tracker/Screens/Auth/login.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:warranty_tracker/Screens/Auth/SplashScreen.dart';
+import 'package:warranty_tracker/Screens/HomePage.dart';
+import 'package:warranty_tracker/Screens/Auth/LoginPage.dart';
+import 'package:warranty_tracker/Screens/Auth/OnBoardPage.dart';
+import 'package:warranty_tracker/Services/ThemeService.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(App());
+  await GetStorage.init();
+  runApp(Myapp());
+}
+
+class Myapp extends StatelessWidget {
+
+  final storage = GetStorage();
+   
+  @override
+  Widget build(BuildContext context) {
+
+    bool isFirstLogin = storage.read('firstLogin') ?? true;
+
+    return GetMaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: ThemeService().getCurrentThemeMode(),
+      home: isFirstLogin ? Onboard() : Spalsh(),
+    );
+  }
 }
 
 class App extends StatelessWidget {
@@ -24,20 +46,16 @@ class App extends StatelessWidget {
             color: Colors.white,
             child: Center( 
               child: CircularProgressIndicator(
-                backgroundColor: Color(0xff5458e1))));
+                backgroundColor: Color(0xff5458e1)
+              )
+            )
+          );
         } else {
           if (snapshot.hasData) {
-            return MultiProvider(
-              providers: [
-                ChangeNotifierProvider<DataModel>(create: (_) => DataModel()),
-
-                ChangeNotifierProvider<ProductsModel>(create: (_) => ProductsModel())
-              ],
-              child: Home(),
-            );
+            return HomePage();
            
           } else {
-            return Log();
+            return LoginPage();
           }
         }
       }

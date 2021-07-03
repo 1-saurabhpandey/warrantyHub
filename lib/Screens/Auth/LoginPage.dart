@@ -1,23 +1,13 @@
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:warranty_tracker/Services/auth.dart';
+import 'package:warranty_tracker/Services/AuthService.dart';
 
-class Log extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Login()
-    );
-  }
-}
-
-
-class Login extends StatelessWidget {
+class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).cardColor,
       body: SafeArea(
         child: Center(
           child: Column(
@@ -26,7 +16,7 @@ class Login extends StatelessWidget {
               Container(
                 alignment: Alignment.topCenter,
                 child: AvatarGlow(
-                  glowColor: Colors.deepPurple[900]!,
+                  glowColor: Color(0xff5458e1),
                   endRadius: 80,
                   child: Material(
                     elevation: 8,
@@ -42,7 +32,7 @@ class Login extends StatelessWidget {
               Container(
                 child:Text(
                   'WarrantyHub',
-                  style: GoogleFonts.meriendaOne(
+                  style: GoogleFonts.montserrat(
                     textStyle: TextStyle(
                       fontSize: 25,
                       fontWeight: FontWeight.w600
@@ -53,7 +43,7 @@ class Login extends StatelessWidget {
               SizedBox(height: 20,),
               Container(
                 child: Text('Online Warranty Tracking & Management',
-                style:GoogleFonts.raleway(
+                style:GoogleFonts.montserrat(
                   textStyle:TextStyle(
                     fontSize: 17
                   )
@@ -61,9 +51,9 @@ class Login extends StatelessWidget {
               ),
               SizedBox(height: 50,),
               Padding(
-                    padding: const EdgeInsets.fromLTRB(8,60,8,8),
-                    child: InkWell(
-                    child: Container(
+                padding: const EdgeInsets.fromLTRB(8,60,8,8),
+                child: InkWell(
+                  child: Container(
                     width: 280,
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -73,16 +63,8 @@ class Login extends StatelessWidget {
                     height: 45,),
                   ),
 
-                    onTap: () async {
-                      dynamic result = AuthService().signInGoogle();
-                            
-                    if (result == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Some error occured'),
-                        )
-                      );
-                    }
+                  onTap: () async {
+                    AuthService().signInGoogle();
                   },
                 ),
               ),

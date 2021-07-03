@@ -1,16 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:warranty_tracker/main.dart';
 
-class OnboardingScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Onboard(),
-    );
-  }
-}
 class Onboard extends StatefulWidget {
   @override
   _OnboardState createState() => _OnboardState();
@@ -18,11 +10,11 @@ class Onboard extends StatefulWidget {
 
 class _OnboardState extends State<Onboard> {
 
- final int _numPages = 3;
-  final PageController _pageController = PageController(initialPage: 0);
-  int _currentPage = 0;
+ final int numPages = 3;
+  final PageController pageController = PageController(initialPage: 0);
+  int currentPage = 0;
 
-  Widget _indicator(bool active){
+  Widget indicator(bool active){
     return AnimatedContainer(
       duration: Duration(milliseconds: 150),
       margin: EdgeInsets.symmetric(horizontal: 3),
@@ -42,9 +34,9 @@ class _OnboardState extends State<Onboard> {
         color: Colors.white,
         child: Container(
           child: PageView(
-            controller: _pageController,
+            controller: pageController,
             onPageChanged: (int page){
-              _currentPage = page;
+              currentPage = page;
               setState((){});
             },
             children: <Widget>[
@@ -69,7 +61,7 @@ class _OnboardState extends State<Onboard> {
         ),
       ),
 
-      bottomSheet: _currentPage != 2 ? 
+      bottomSheet: currentPage != 2 ? 
       Container(
         height: 80,
         color: Colors.white,
@@ -79,18 +71,18 @@ class _OnboardState extends State<Onboard> {
           children: <Widget>[
           TextButton(
             onPressed: (){
-              _pageController.animateToPage(3, duration: Duration(milliseconds: 400), curve: Curves.linear);
+              pageController.animateToPage(3, duration: Duration(milliseconds: 400), curve: Curves.linear);
               setState(() {});     
             },
-            child: Text('SKIP'),
+            child: Text('SKIP',style: TextStyle(color: Color(0xff5458e1)),),
           ),
 
           Container(
             child: Row(
               children: <Widget>[
-                for(int i=0 ; i < _numPages ; i++)
+                for(int i=0 ; i < numPages ; i++)
 
-                i == _currentPage ? _indicator(true) : _indicator(false) 
+                i == currentPage ? indicator(true) : indicator(false) 
                   //for --> if else
               ],
             ),
@@ -98,7 +90,7 @@ class _OnboardState extends State<Onboard> {
 
           TextButton(
             onPressed: (){
-              _pageController.animateToPage(_currentPage + 1 , duration: Duration(milliseconds: 400), curve: Curves.linear);
+              pageController.animateToPage(currentPage + 1 , duration: Duration(milliseconds: 400), curve: Curves.linear);
               setState((){});
             },
             child: Container(
@@ -114,15 +106,11 @@ class _OnboardState extends State<Onboard> {
     ) 
       
       : TextButton(
+
         style: ButtonStyle(
           backgroundColor: MaterialStateProperty.all(Colors.white)
         ),
-        onPressed: () =>
-        Navigator.pushReplacement(
-          context, MaterialPageRoute(
-            builder: (BuildContext context) => App()
-          ),
-        ),
+        onPressed: () => Get.off(App()),
         
           child: Container(
             height: 60,
@@ -139,7 +127,7 @@ class _OnboardState extends State<Onboard> {
             ),
             decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(30),
-            color: Color(0xff5458e1),
+            color:Color(0xff5458e1),
           ),
         ),
       )
@@ -161,12 +149,17 @@ class _OnboardState extends State<Onboard> {
           ),
           SizedBox(height: 40),
           Align(
-            child: Text(title,
-            style:GoogleFonts.libreFranklin(textStyle:TextStyle(fontSize: 25 , fontWeight: FontWeight.w400)) )
+            child: Text(
+              title,
+              style:GoogleFonts.roboto(textStyle:TextStyle(fontSize: 25 , fontWeight: FontWeight.w600))
+            )
           ),
-          SizedBox(height:10) 
         ],
       ),
     );
   }
 }
+
+
+
+ 

@@ -1,32 +1,28 @@
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cached_pdfview/flutter_cached_pdfview.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:open_file/open_file.dart';
 import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:warranty_tracker/Model/dataModel.dart';
-import 'package:warranty_tracker/Screens/Common_Widgets/alert.dart';
-import 'package:warranty_tracker/Screens/Common_Widgets/preview.dart';
-import 'package:warranty_tracker/Services/database.dart';
-import 'package:http/http.dart' as http;
+import 'package:warranty_tracker/Screens/Common_Widgets/SnackBar.dart';
+import 'package:warranty_tracker/Screens/Common_Widgets/UploadingDialog.dart';
+import 'package:warranty_tracker/Screens/Common_Widgets/AlertDialog.dart';
+import 'package:warranty_tracker/Screens/Common_Widgets/PreviewPage.dart';
+import 'package:warranty_tracker/Services/DataService.dart';
+import 'package:warranty_tracker/ViewModels/ItemsViewModel.dart';
 
-class Receipt extends StatefulWidget {
+// ignore: must_be_immutable
+class ItemBill extends StatelessWidget {
 
-  final productid ;
-  Receipt({@required this.productid});
+  final productId ;
+  ItemBill({@required this.productId});
 
-  @override
-  _ReceiptState createState() => _ReceiptState();
-}
-
-class _ReceiptState extends State<Receipt> {
-
-  final GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
-  var data;
-  
   launchURL(String url) async {
     if (await canLaunch(url)) {
       await launch(url);
@@ -35,112 +31,108 @@ class _ReceiptState extends State<Receipt> {
     }
   }
 
+  String docSlot = '';
+
   @override
   Widget build(BuildContext context){
-    data = Provider.of<DataModel>(context).getProductsData();
-    List receiptData = data[widget.productid]['bill'];
     
-    return Scaffold(
+    return GetX<ItemViewModel>(
+      init: ItemViewModel(),
+      builder: (data){
 
-      key: _globalKey, 
-      appBar: AppBar(title: Text('Product Receipts'),
-        backgroundColor: Color(0xff5458e1), 
-      ),
+        List receiptData = data.getItemList().where((e) => e['productId'] == productId).first['details']['bill'];
+        docSlot = data.getItemList().where((e) => e['productId'] == productId).first['docId'];
 
-      floatingActionButton: FloatingActionButton(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5))),
-        backgroundColor: Color(0xff5458e1),
-        child: Icon(Icons.add, color: Colors.white),  
-        elevation: 7, mini: true,
-        onPressed: ()async {
-            
-          if(receiptData.length == 5){
-            alertWidget(context, 'You can only upload 5 receipts per product');
-            
-          }else{
-            var result = await Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => PreviewWidget(productid: widget.productid))); 
-            
-            if (result != null){ 
-              
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: result == 'success' ? Text('New receipt added successfully') : Text('Some error occured'),
-                  duration: Duration(seconds: 3), 
-                )
-              );
+        return Scaffold(
+
+          appBar: AppBar(
+            title: Text('Product Receipts'),
+            backgroundColor: Color(0xff5458e1), 
+          ),
+
+          floatingActionButton: FloatingActionButton(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5))),
+            backgroundColor: Color(0xff5458e1),
+            child: Icon(Icons.add, color: Colors.white),  
+            elevation: 7, mini: true,
+            onPressed: ()async {
+                
+              if(receiptData.length == 5){
+                alertWidget('You can only upload 5 receipts per product');
+                
+              }else{
+                filePicker();
+              } 
             }
-          } 
-        }
-      ),
+          ),
 
-      body: receiptData.isNotEmpty 
-        ? Container(
-          padding: EdgeInsets.all(10), 
-          color: Color(0xfff0f4ff),
-          child: ListView.builder( 
-            itemCount: receiptData.length,
-            itemBuilder: (context,index){
+          body: receiptData.isNotEmpty
+            ? Container(
+              padding: EdgeInsets.all(10), 
+              color: Theme.of(context).canvasColor,
+              child: ListView.builder( 
+                itemCount: receiptData.length,
+                itemBuilder: (context,index){
 
-              return Padding(
-                padding: const EdgeInsets.all(10),
-                child: Card(
-                  elevation: 7,
-                  child: Container(
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(borderRadius: 
-                      BorderRadius.all(Radius.circular(10)),
-                      color: Colors.white,),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        Align( 
-                          alignment: Alignment.topLeft,
-                          child: receiptData[index]['type'] != 'pdf'
-
-                            ? Icon(Icons.image,size: 25, color: Colors.blue)
-                            : Icon(Icons.picture_as_pdf,size: 25,color: Colors.red,),
-
+                  return Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Card(
+                      elevation: 7,
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(borderRadius: 
+                          BorderRadius.all(Radius.circular(10)),
                         ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            Align( 
+                              alignment: Alignment.topLeft,
+                              child: receiptData[index]['type'] != 'pdf'
 
-                        SizedBox(width: 20,),
-                               
-                        Expanded(
-                          child: InkWell(
-                            child: Text('Receipt ${index + 1}'),
-                            onTap: () => receiptData[index]['type'] != 'pdf' 
-                              ? Navigator.of(context).push(
-                                MaterialPageRoute(builder: (context) => Preview('Receipt ${index + 1}', null, 'image', receiptData[index]['url'])))
- 
-                              : Navigator.of(context).push(
-                                MaterialPageRoute(builder: (context) => Preview('Receipt ${index + 1}', null, 'pdf', receiptData[index]['url'])))
-                          )
-                        ),
+                                ? Icon(Icons.image,size: 25, color: Colors.blue)
+                                : Icon(Icons.picture_as_pdf,size: 25,color: Colors.red,),
 
-                        optionButton(receiptData[index])
-                      ],
-                    )
-                  ),
-                ),
-              );
-            }                   
+                            ),
+
+                            SizedBox(width: 20,),
+                                  
+                            Expanded(
+                              child: InkWell(
+                                child: Text('Receipt ${index + 1}'),
+                                onTap: () => receiptData[index]['type'] != 'pdf' 
+                                  ? Get.to(() => Preview('Receipt ${index + 1}', null, 'image', receiptData[index]['url']))
+  
+                                  : Get.to(() => Preview('Receipt ${index + 1}', null, 'pdf', receiptData[index]['url']))
+                              )
+                            ),
+
+                            optionButton(receiptData[index],'Receipt ${index + 1}')
+                          ],
+                        )
+                      ),
+                    ),
+                  );
+                }                   
+              )
+            )
+          : Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text("No Receipts\n\n",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 15)),
+                                    
+                Text(" Click on PLUS button to add new receipt", 
+                  style: TextStyle(fontWeight: FontWeight.bold,fontSize: 15),),
+              ],
+            ),
           )
-        )
-      : Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text("No Receipts\n\n",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 15)),
-                                
-            Text(" Click on PLUS button to add new receipt", 
-              style: TextStyle(fontWeight: FontWeight.bold,fontSize: 15),),
-          ],
-        ),
-      )
+        );
+      }
     );
   }
 
-  Widget optionButton(var data){
+  Widget optionButton(var data,String name){
 
     return PopupMenuButton(
       itemBuilder: (_) => 
@@ -159,110 +151,154 @@ class _ReceiptState extends State<Receipt> {
         ),
       ],
       onSelected: (value) async{
-        if(value == 'delete'){
-          delete( context,widget.productid, data['name'], data['type'],data['url']);
-        }
-        if(value == 'download'){
-          await launchURL(data['url']);
-        }
-        if(value == 'share'){
-         await share(data['url'],data['type']);
+
+        try{
+          Dio dio = Dio();
+          var directory = await getExternalStorageDirectory();
+          var downloadedPath;
+
+          if(value == 'delete'){
+            delete(productId, data['type'],data['url']);
+          }
+
+          if(value == 'download'){
+
+            uploadingDialog('Downloading...');
+
+            await dio.download(
+              data['url'], '${directory!.path}/name.${data['type']}',
+            ).then(
+              (value){
+                Get.back();
+
+                Get.dialog(
+                  AlertDialog(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))), 
+                    title: Text('Success'),
+                    content: Text('File downloaded successfully'),
+                    actions: <Widget>[
+                      TextButton(
+                        child: Text('cancel'),
+                        onPressed: () {
+                          Get.back();
+                        },
+                      ),
+
+                      TextButton(
+                        child: Text('open'),
+                        onPressed: () {
+                          Get.back();
+                          OpenFile.open('${directory.path}/name.${data['type']}');
+                        },
+                      ),
+                    ],
+                  )
+                );
+              }
+            );
+            
+            downloadedPath = '${directory.path}/name.${data['type']}';
+          }
+
+          if(value == 'share'){
+            
+            if(downloadedPath != null) {
+              await Share.shareFiles(
+                [downloadedPath],
+                subject: 'Item Receipt',
+                text: name
+              );
+            }else{
+              
+              uploadingDialog('Loading...');
+
+              await dio.download(
+                data['url'], '${directory!.path}/name.${data['type']}',
+              ).then(
+                (value){
+
+                  Get.back();
+
+                  Share.shareFiles(
+                    ['${directory.path}/name.${data['type']}'],
+                    subject: 'Item Receipt',
+                    text: name
+                  );
+                }
+              );
+            }
+          }
+        }catch(e){
+          snackBar('Something went wrong');
         }
       },
     );
   }
 
-  Future delete(BuildContext context , String productId, String name, String type, String url){
+  delete(String productId, String type, String url){
 
-    return showDialog(context: context,
-      builder: (BuildContext deletecontext){
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
-          title: Text('Delete Receipt'),
-          content: Text('Are you sure you want to delete this file?'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancel',style: TextStyle(color: Color(0xff5458e1)),),
-              onPressed: () {
-                Navigator.of(deletecontext).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Yes',style: TextStyle(color: Color(0xff5458e1)),),
-              onPressed: () {
-                DataService().deleteBill(productId, name, type, url)
-                .whenComplete(()async => 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Item receipt deleted successfully'),
-                      duration: Duration(seconds: 3),
-                    ))
-                );
-                Navigator.of(deletecontext).pop();
-              },
-            )
-          ],
-        );
-      }
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+        title: Text('Delete Receipt'),
+        content: Text('Are you sure you want to delete this file?'),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Cancel',style: TextStyle(color: Get.isDarkMode ? Colors.grey[300] : Color(0xff5458e1)),),
+            onPressed: () => Get.back()
+          ),
+          TextButton(
+            child: Text('Yes',style: TextStyle(color: Get.isDarkMode ? Colors.grey[300] : Color(0xff5458e1)),),
+            onPressed: () {
+              DataService().deleteBill(productId, type, url, docSlot);
+            },
+          )
+        ],
+      )
     );
   }
 
-  Future share(Uri url, String type) async{
+   Future filePicker() async {
 
-   
-    http.Response response = await http.get(url);
-    String path = File.fromRawPath(response.bodyBytes).path;
-
-    await Share.shareFiles(
-      [path],
-      subject: 'Item Receipt',
-      text: 'Item Receipt'
-    );
-  }
-}
-
-class PreviewWidget extends StatefulWidget {
-  
-  final String productid;
-
-  PreviewWidget({ required this.productid});
-
-  @override
-  _PreviewWidgetState createState() => _PreviewWidgetState();
-}
-class _PreviewWidgetState extends State<PreviewWidget> {
-
-  late String type;
-  late String file;
-  late String fileName;
-
-  @override
-  void initState() {
-    filePicker(context);
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+    String fileExtension;
+    String fileName;
+    List allowedExtension = ['pdf','jpg','jpeg','png'];
+    FilePickerResult? filedoc = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf','jpg','jpeg','png']);
 
     
+    fileExtension = filedoc!.files.first.path!.split('.').last;
+    fileName = filedoc.files.first.path!.split('/').last.split('.').first;
+    
+    if(!allowedExtension.contains(fileExtension)){
+      alertWidget('This File Extension($fileExtension) is not allowed');
+    }
+    if (filedoc.files.first.size! > 5000000){ 
+      alertWidget('File size is too big! Size must be less than 5Mb');
+    }
+    else{
+      Get.to(() => uploadItemBill(productId, File(filedoc.files.first.path!), fileExtension, fileName,));
+    }
+  }
+
+  Widget uploadItemBill(String productId, File file, String fileExtension, String fileName, ){
     return Scaffold(
       appBar: AppBar( 
-        title: Text(fileName),    //fileName != null ? Text(fileName) : null,
+        title: Text(fileName),
+        backgroundColor: Color(0xff5458e1), 
       ),
-      body: ListView(  //file != null 
+      body: ListView(  
         children: [
 
           Padding(
             padding: const EdgeInsets.all(20),
             child: Container(
-              child: type == 'pdf'
+              child: fileExtension == 'pdf'
                 ? Container(
                   padding: EdgeInsets.all(10), 
                   width: 480,height: 480, 
-                  child: PDF().fromPath(file)
+                  child: PDF().fromPath(file.path)
                 )
-              : Image.file(File(file),width: 450,height: 450,)
+              : Image.file(file,width: 450,height: 450,)
             ),
           ),
 
@@ -271,44 +307,17 @@ class _PreviewWidgetState extends State<PreviewWidget> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Color(0xff5458e1)),),
-                  onPressed: () async{                // again calling filepicker to get new file        
-                    filePicker(context);
-                  }, 
-                  child: Text('Select another',style: TextStyle(color: Colors.white),)
-                ),
-
+                
                 ElevatedButton(
                   style:ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(Color(0xff5458e1))
                   ),
                   onPressed: ()async {
-                    showDialog(
-                      barrierDismissible: false,
-                      context: context,
-                      builder: (context){
-                        return SimpleDialog(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5))),
-                          children: [
-                            Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text('Uploading...'),
-                              ),
-                            )
-                          ], 
-                        );
-                      }
-                    ); 
+                    uploadingDialog('Uploading...');
 
-                    await DataService().uploadItemBill(File(file),type,fileName,widget.productid, context).then((result){
-                      Navigator.of(context,rootNavigator: true).pop();  //to close uploading popup
-                      Navigator.pop(context,result);  //to close preview widget
-                    });
+                    await DataService().uploadBill(file,fileExtension,fileName,productId,docSlot);
                   }, 
-                  child: Text('Save',style: TextStyle(color: Colors.white),)
+                  child: Text('Upload',style: TextStyle(color: Colors.white),)
                 ),
               ],
             ),
@@ -317,34 +326,5 @@ class _PreviewWidgetState extends State<PreviewWidget> {
       )
     );
   }
-
-  Future filePicker(BuildContext context) async {
-
-    String extensionCheck;
-    String filename;
-    List allowedExtension = ['pdf','jpg','jpeg','png'];
-    FilePickerResult? filedoc = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf','jpg','jpeg','png']);
-
-    
-    extensionCheck = filedoc!.files.first.path!.split('.').last;
-    filename = filedoc.files.first.path!.split('/').last.split('.').first;
-    
-     
-
-    if(!allowedExtension.contains(extensionCheck)){
-      Navigator.of(context).pop();
-      alertWidget(context, 'This File Extension($extensionCheck) is not allowed');
-    }
-    if (filedoc.files.first.size! > 5000){ 
-      Navigator.of(context).pop();
-      alertWidget(context, 'File size is too big! Size must be less than 5Mb');
-    }
-    else{
-      setState(() {
-        type = extensionCheck;
-        fileName = filename;
-        file = filedoc.files.first.path!;
-      });
-    }
-  }
 }
+
