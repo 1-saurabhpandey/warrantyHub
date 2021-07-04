@@ -13,6 +13,7 @@ class Items extends StatelessWidget {
   late String status;
   late int difference ;
   late String timeLeft ;
+  List<Map> expiryDateList = [];
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +24,7 @@ class Items extends StatelessWidget {
         child: Icon(Icons.add,color: Colors.white),
         backgroundColor: Color(0xff5458e1),
         elevation: 7,mini: true,
-        onPressed: () => Get.to(() => AddItem()),
+        onPressed: () => Get.to(() => AddItem())
       ),
        
       body: SafeArea(
@@ -49,7 +50,7 @@ class Items extends StatelessWidget {
           itemBuilder: (context,index){
 
             DateTime date = DateTime.now();
-            DateTime expiryDate = items[index]['details']["expiry"].toDate();
+            DateTime expiryDate = items[index]['details']["expiry"].toDate();         
 
             //changing the format of expirydate 
 
@@ -74,7 +75,7 @@ class Items extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(10,5,10,5), 
               child: Card(
                 color: Theme.of(context).cardColor,
-                elevation: 7, 
+                elevation: 4, 
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), 
                 child: InkWell(
                   onTap: () async{

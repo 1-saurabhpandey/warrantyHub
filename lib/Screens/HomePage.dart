@@ -28,8 +28,10 @@ class HomePage extends StatelessWidget {
     User user = FirebaseAuth.instance.currentUser!;
 
     return Container(
+      
       color: Theme.of(context).cardColor,
       child: ListView(
+        padding: EdgeInsets.zero,
         children: <Widget>[
           
         UserAccountsDrawerHeader(

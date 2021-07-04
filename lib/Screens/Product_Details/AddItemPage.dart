@@ -211,6 +211,7 @@ class _AddItemState extends State<AddItem> {
     );
   }
 
+
   Widget dateField(String type){
     return Padding(
       padding: const EdgeInsets.fromLTRB(30, 8, 30, 8),
@@ -230,7 +231,19 @@ class _AddItemState extends State<AddItem> {
             context: context,
             firstDate: DateTime(1900),
             initialDate: DateTime.now() ,
-            lastDate: DateTime(2100)
+            lastDate: DateTime(2100),
+            builder: (BuildContext context,Widget? child){
+              return Theme(
+                data: ThemeData(
+                  colorScheme: Get.isDarkMode 
+                  ? ColorScheme.dark(surface: Color(0xff5458e1),primary: Color(0xff5458e1)) 
+                  : ColorScheme.light(primary: const Color(0xff5458e1)),
+                ),
+                child: child!,
+              );
+              
+              
+            }
           );
         },
 
@@ -396,61 +409,65 @@ class _AddItemState extends State<AddItem> {
 
     List<String?> overSizedFiles = [];
 
-    if (fileType == 'image') {
+    try{
+      if (fileType == 'image') {
 
-      FilePickerResult? imageFiles = await FilePicker.platform.pickFiles(type: FileType.image, allowMultiple: true);
+        FilePickerResult? imageFiles = await FilePicker.platform.pickFiles(type: FileType.image, allowMultiple: true);
 
-      if(imageFiles != null){
-        if(imageFiles.count > 5 || imageList.length == 5){
-          alertWidget('You can only upload 5 images per product'); 
-        }
+        if(imageFiles != null){
+          if(imageFiles.count > 5 || imageList.length == 5){
+            alertWidget('You can only upload 5 images per product'); 
+          }
 
-        if(imageFiles.count <= 5){
-          for(int i = 0; i < imageFiles.count; i++){
- 
-            if(imageFiles.files[i].size! > 5000000){
-              overSizedFiles.add(imageFiles.files[i].name); 
-            } 
-            else if(imageList.length < 5){ 
-              data.setImageList(imageFiles.files[i].path);
+          if(imageFiles.count <= 5){
+            for(int i = 0; i < imageFiles.count; i++){
+  
+              if(imageFiles.files[i].size! > 5000000){
+                overSizedFiles.add(imageFiles.files[i].name); 
+              } 
+              else if(imageList.length < 5){ 
+                data.setImageList(imageFiles.files[i].path);
+              }
             }
           }
-        }
 
-        if(overSizedFiles.length > 0){
-          alertWidget('File size is too big! Size must be less than 5Mb' );
-        }
-      }
-    }
-
-    if (fileType == 'bill') {
-
-      FilePickerResult? filedoc = await FilePicker.platform.pickFiles( 
-        type: FileType.custom, allowedExtensions: ['pdf','jpg','jpeg','png'],
-        allowMultiple: true
-      );
-
-      if(filedoc != null){
-        if(filedoc.count > 5 || billList.length == 5){
-          alertWidget('You can only upload 5 bills per product'); 
-        }
-
-        if(filedoc.count <= 5){
-          for(int i = 0; i < filedoc.count; i++){
- 
-            if(filedoc.files[i].size! > 5000000){
-              overSizedFiles.add(filedoc.files[i].name); 
-            } 
-            if(billList.length < 5){
-              data.setBillList(filedoc.files[i].path);
-            }
+          if(overSizedFiles.length > 0){
+            alertWidget('File size is too big! Size must be less than 5Mb' );
           }
         }
+      }
 
-        if(overSizedFiles.length > 0){
-          alertWidget('File size is too big! Size must be less than 5Mb'); 
+      if (fileType == 'bill') {
+
+        FilePickerResult? filedoc = await FilePicker.platform.pickFiles( 
+          type: FileType.custom, allowedExtensions: ['pdf','jpg','jpeg','png'],
+          allowMultiple: true
+        );
+
+        if(filedoc != null){
+          if(filedoc.count > 5 || billList.length == 5){
+            alertWidget('You can only upload 5 bills per product'); 
+          }
+
+          if(filedoc.count <= 5){
+            for(int i = 0; i < filedoc.count; i++){
+  
+              if(filedoc.files[i].size! > 5000000){
+                overSizedFiles.add(filedoc.files[i].name); 
+              } 
+              if(billList.length < 5){
+                data.setBillList(filedoc.files[i].path);
+              }
+            }
+          }
+
+          if(overSizedFiles.length > 0){
+            alertWidget('File size is too big! Size must be less than 5Mb'); 
+          }
         }
       }
+    }catch(e){
+      alertWidget('Storage access permission is denied, please allow it in the settings');
     }
   }
 }

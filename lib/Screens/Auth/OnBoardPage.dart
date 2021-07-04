@@ -3,12 +3,12 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:warranty_tracker/main.dart';
 
-class Onboard extends StatefulWidget {
+class OnboardPage extends StatefulWidget {
   @override
-  _OnboardState createState() => _OnboardState();
+  _OnboardPageState createState() => _OnboardPageState();
 }
 
-class _OnboardState extends State<Onboard> {
+class _OnboardPageState extends State<OnboardPage> {
 
  final int numPages = 3;
   final PageController pageController = PageController(initialPage: 0);

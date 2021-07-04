@@ -31,15 +31,15 @@ class ThemeService{
     
     primaryColor: Colors.black, 
     brightness: Brightness.dark,
-    accentColor: Color(0xff323232 ),
+    accentColor: Color(0xff323232),
     accentIconTheme: IconThemeData(color: Colors.black),
-    cardColor: Color(0xff323232 ),
+    cardColor: Color(0xff323232),
     toggleableActiveColor: Color(0xff5458e1),
     canvasColor: Colors.black,
 
     textSelectionTheme: TextSelectionThemeData(
-      selectionColor: Color(0xff323232 ),
-      selectionHandleColor: Color(0xff323232 ),
+      selectionColor: Color(0xff323232),
+      selectionHandleColor: Color(0xff323232),
       cursorColor: Color(0xff757575)
     ),
 

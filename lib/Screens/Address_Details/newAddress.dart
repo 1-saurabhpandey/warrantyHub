@@ -42,8 +42,8 @@ class NewAddress extends StatelessWidget {
                   child: Card(
                     elevation: 5,
                     child: ListTile(
-                      leading: Image.asset('lib/images/map.png',height: 30,width: 30),
-                      title: Text('Open in Google Maps'),
+                      leading: Image.asset('lib/images/map.png',height: 60,width: 60),
+                      title: Text('Open Google Maps'),
                       onTap: ()async{
                         Placemark? result = await Get.to(() => MapsPage());
                         

@@ -45,6 +45,7 @@ dependencies:
   get_storage:
   dio:
   open_file:
+  flutter_local_notifications:
   
   
   
@@ -77,10 +78,9 @@ flutter:
   - lib/images/onboard/share.png
   - lib/images/onboard/track.png
   - lib/images/onboard/upload.png
-  - lib/images/logo/dark.jpg
-  - lib/images/logo/logo.jpg
-  - lib/images/map.png 
+  - lib/images/logo/logo.png
   - lib/images/mapicon.png 
+  - lib/images/map.png 
 
   
 

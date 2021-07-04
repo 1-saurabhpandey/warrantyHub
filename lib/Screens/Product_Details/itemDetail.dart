@@ -207,6 +207,7 @@ class ItemDetail extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Card(
+        elevation: 4,
         child: Container(
           padding: EdgeInsets.fromLTRB(8, 5, 8, 5),
           child: Column( 
@@ -244,6 +245,7 @@ class ItemDetail extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Card(
+        elevation: 4,
         child: Container( 
           padding: EdgeInsets.fromLTRB(8, 5, 8, 5),
           child: Column( 
@@ -281,6 +283,7 @@ class ItemDetail extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Card(
+        elevation: 4,
         child: Container(
           padding: const EdgeInsets.all(8.0),
           child: Column(
@@ -317,6 +320,7 @@ class ItemDetail extends StatelessWidget {
         return Padding( 
           padding: EdgeInsets.all(8),
           child: Card(
+            elevation: 4,
             child: Container(
               padding: const EdgeInsets.all(8.0),
 

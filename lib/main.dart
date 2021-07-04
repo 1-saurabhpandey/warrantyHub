@@ -7,12 +7,14 @@ import 'package:warranty_tracker/Screens/Auth/SplashScreen.dart';
 import 'package:warranty_tracker/Screens/HomePage.dart';
 import 'package:warranty_tracker/Screens/Auth/LoginPage.dart';
 import 'package:warranty_tracker/Screens/Auth/OnBoardPage.dart';
+import 'package:warranty_tracker/Services/NotificationService.dart';
 import 'package:warranty_tracker/Services/ThemeService.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await GetStorage.init();
+  NotificationService().init();
   runApp(Myapp());
 }
 
@@ -30,7 +32,7 @@ class Myapp extends StatelessWidget {
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: ThemeService().getCurrentThemeMode(),
-      home: isFirstLogin ? Onboard() : Spalsh(),
+      home: isFirstLogin ? OnboardPage() : SpalshScreen(),
     );
   }
 }

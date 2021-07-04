@@ -4,46 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:warranty_tracker/main.dart';
 
-
-// class SplashScreen extends StatelessWidget {
-
-//   final Tween<double> _scale = Tween<double>(begin: 0, end: 1.3);
-
-//   @override
-//   Widget build(BuildContext context) {
-   
-//     return Scaffold(
-
-//       backgroundColor: Theme.of(context).cardColor,
-
-//       body: Center(
-//         child: TweenAnimationBuilder(
-//           onEnd: (){
-            
-//             Timer(Duration(milliseconds: 1000), () => Get.off(() => App()));
-        
-//           },
-            
-//           tween: _scale,
-//           duration: Duration(milliseconds: 1000),
-//           builder: (BuildContext context,double scale, Widget? child){
-//             return Transform.scale(scale: scale, child: child);
-//           },
-//           child: Container(
-//             child: Text('W'),
-//           ),
-//         )
-//       ),
-//     );
-//   }
-// }
-
-class Spalsh extends StatefulWidget {
+class SpalshScreen extends StatefulWidget {
   @override
-  _SpalshState createState() => _SpalshState();
+  _SpalshScreenState createState() => _SpalshScreenState();
 }
 
-class _SpalshState extends State<Spalsh> with TickerProviderStateMixin {
+class _SpalshScreenState extends State<SpalshScreen> with TickerProviderStateMixin {
 
   late AnimationController controller;
   late Animation<double> animation;
@@ -65,6 +31,12 @@ class _SpalshState extends State<Spalsh> with TickerProviderStateMixin {
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Center(
       child: Container(
@@ -80,7 +52,7 @@ class _SpalshState extends State<Spalsh> with TickerProviderStateMixin {
               elevation: 8,
               shape: CircleBorder(),
               child: CircleAvatar(
-                backgroundImage: AssetImage('lib/images/logo/logo.jpg'),
+                backgroundImage: AssetImage('lib/images/logo/logo.png'),
                 radius: 55,
               ),
             ),

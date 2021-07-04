@@ -22,7 +22,7 @@ class LoginPage extends StatelessWidget {
                     elevation: 8,
                     shape: CircleBorder(),
                     child: CircleAvatar(
-                      backgroundImage: AssetImage('lib/images/logo/logo.jpg'),
+                      backgroundImage: AssetImage('lib/images/logo/logo.png'),
                       radius: 50,
                     ),
                   ),

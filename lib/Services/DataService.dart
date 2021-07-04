@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:warranty_tracker/Screens/Common_Widgets/SnackBar.dart';
 import 'package:warranty_tracker/ViewModels/AddressViewModel.dart';
 import 'package:warranty_tracker/ViewModels/ItemsViewModel.dart';
+import 'package:warranty_tracker/ViewModels/NotificationViewModel.dart';
 
 class DataService extends GetxController{
 
@@ -170,6 +171,12 @@ class DataService extends GetxController{
         'product_id_list' : FieldValue.arrayUnion([productId])
       }, SetOptions(merge: true)); 
 
+      Get.put(NotificationViewmodel()).setNotification({
+        'id' : productId,
+        'expiry': expiry.toDate(),
+        'name': productName
+      });
+
       Get.back();
       Get.back();
       snackBar('Item added successfully!');
@@ -216,6 +223,8 @@ class DataService extends GetxController{
       deleteItems.forEach((element) async{
         await FirebaseStorage.instance.refFromURL(element).delete();
       });
+
+      Get.put(NotificationViewmodel()).cancelNotification(productId);
 
       Get.back();
       Get.back();
