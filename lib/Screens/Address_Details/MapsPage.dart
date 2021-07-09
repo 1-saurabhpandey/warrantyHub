@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:warranty_tracker/Screens/Common_Widgets/AlertDialog.dart';
  
 
 class MapsPage extends StatefulWidget {
@@ -46,7 +47,7 @@ class _MapsPageState extends State<MapsPage> {
       });
       }
     ).catchError((onError){
-      alertBox(context, 'Location permission is denied, please allow it in the settings');
+      alertWidget('Whoops...', 'Location permission is denied, please allow it in the settings');
       setState(() {  
         initialPosition = CameraPosition(target: LatLng(28.7041,77.1025),zoom: 17);
       });
@@ -139,26 +140,6 @@ class _MapsPageState extends State<MapsPage> {
         )
       );
     });
-  }
-
-  alertBox(BuildContext context, String alertMessage){
-   
-    Get.dialog(
-      AlertDialog(
-        backgroundColor: Theme.of(context).cardColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))), 
-        title: Text('Oops...'),
-        content: Text(alertMessage),
-        actions: <Widget>[
-          TextButton(
-            child: Text('OK'),
-            onPressed: () {
-              Get.back();
-            },
-          )
-        ],
-      )
-    );
   }
 
   @override
@@ -257,7 +238,7 @@ class _MapsPageState extends State<MapsPage> {
               tooltip: 'My Location',
               onPressed: (){
                 if(initialPosition == CameraPosition(target: LatLng(28.7041,77.1025),zoom: 17)){
-                  alertBox(context, 'Location permission is denied, please allow it in the settings');
+                  alertWidget('Whoops...', 'Location permission is denied, please allow it in the settings');
                 }
                 controller.animateCamera(
                   CameraUpdate.newCameraPosition(

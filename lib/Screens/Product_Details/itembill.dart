@@ -58,7 +58,7 @@ class ItemBill extends StatelessWidget {
             onPressed: ()async {
                 
               if(receiptData.length == 5){
-                alertWidget('You can only upload 5 receipts per product');
+                alertWidget('Sorry...','You can only upload 5 receipts per product');
                 
               }else{
                 filePicker();
@@ -270,10 +270,10 @@ class ItemBill extends StatelessWidget {
     fileName = filedoc.files.first.path!.split('/').last.split('.').first;
     
     if(!allowedExtension.contains(fileExtension)){
-      alertWidget('This File Extension($fileExtension) is not allowed');
+      alertWidget('Sorry...','This File Extension($fileExtension) is not allowed');
     }
     if (filedoc.files.first.size! > 5000000){ 
-      alertWidget('File size is too big! Size must be less than 5Mb');
+      alertWidget('Sorry...','File size is too big! Size must be less than 5Mb');
     }
     else{
       Get.to(() => uploadItemBill(productId, File(filedoc.files.first.path!), fileExtension, fileName,));

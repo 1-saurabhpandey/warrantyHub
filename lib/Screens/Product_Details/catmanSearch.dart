@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
+import 'package:get/get.dart'; 
 
 class SearchList extends SearchDelegate{
 
@@ -53,65 +54,80 @@ class SearchList extends SearchDelegate{
                   fontWeight: FontWeight.bold
                 ),
               ),
-              onTap: () => addNewDialog(context),
+              onTap: () => Get.bottomSheet(addNewDialog(context))
             )
           ],
         )
     );
   }
 
-  Widget addNewDialog(BuildContext context) => 
-    SimpleDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
-      children: <Widget>[
-        Container(
-          child:Form(
-            key: formkey,
-            child: Column(
-              children: <Widget>[
-                SizedBox(height:10),
+  Widget addNewDialog(BuildContext context){
+    return Container(
 
-                Align(
-                  child: Container(
-                    width: 80,
-                    height: 3,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(3)),
-                      color: Colors.black,),),
+      height: 250,
+      margin: const EdgeInsets.symmetric(horizontal: 5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
+        color: Colors.white,
+      ),
+
+      child: Form(
+        key: formkey,
+        child: Column(
+          children: <Widget>[
+            SizedBox(height:10),
+
+            Align(
+              child: Container(
+                width: 80,
+                height: 3,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(3)),
+                  color: Colors.black,
                 ),
-                
-                Padding(
-                    padding: const EdgeInsets.only(left:20,right: 20,bottom: 20),
-                    child: TextFormField(
-                      controller: nameCon,
-                      decoration: 
-                      InputDecoration(
-                        labelText: '$type name', 
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(5))
-                        ),
-                      ),
+              ),
+            ),
+            
+            Padding(
+                padding: const EdgeInsets.fromLTRB(20, 35, 20, 20),
+                child: TextFormField(
+                  controller: nameCon,
+                  decoration: 
+                  InputDecoration(
 
-                      validator: (val) => val!.isEmpty ? 'Enter $type name' : null,
-                      onChanged: (val) => name = val
-                      
-                    ),),
-                
-                ElevatedButton(
-                  child: Text('Add',style: TextStyle(color: Colors.white),),
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Color(0xff5458e1))
-                  ) ,
-                  onPressed: () async{
-                    if(formkey.currentState!.validate()){
-                      close(context,name);
-                    }
-                },
-              )
-            ]
-          )
-        ),
+                    labelText: '$type name', 
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(5))
+                    ),
+
+                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xff757575 ))),
+                    labelStyle: TextStyle(color: Get.isDarkMode ? Colors.grey[500] : Colors.grey[600]),
+                    
+                  ),
+
+                  validator: (val) => val!.isEmpty ? 'Enter $type name' : null,
+                  onChanged: (val) => name = val
+                  
+                ),),
+            
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: ElevatedButton(
+                child: Text('Add',style: TextStyle(color: Colors.white),),
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Color(0xff5458e1))
+                ) ,
+                onPressed: () async{
+                  if(formkey.currentState!.validate()){
+                    close(context,name);
+                  }
+              },
+          ),
+            )
+        ]
       )
-    ],    
-  );
+  ),
+    );
+  }
+    
 }

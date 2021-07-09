@@ -100,7 +100,7 @@ class _AddItemState extends State<AddItem> {
                           onTap: () async{  
           
                             imageList.length == 5 
-                            ? alertWidget('You can upload only 5 images per product') 
+                            ? alertWidget('Sorry...','You can upload only 5 images per product') 
                             : filePicker('image',data); 
                             
                           },                   
@@ -119,7 +119,7 @@ class _AddItemState extends State<AddItem> {
                           onTap: () async{
           
                             billList.length == 5 
-                            ? alertWidget('You can upload only 5 bills per product') 
+                            ? alertWidget('Sorry...','You can upload only 5 bills per product') 
                             : filePicker('bill',data);
                           } 
                         ),
@@ -416,7 +416,7 @@ class _AddItemState extends State<AddItem> {
 
         if(imageFiles != null){
           if(imageFiles.count > 5 || imageList.length == 5){
-            alertWidget('You can only upload 5 images per product'); 
+            alertWidget('Sorry...','You can only upload 5 images per product'); 
           }
 
           if(imageFiles.count <= 5){
@@ -432,7 +432,7 @@ class _AddItemState extends State<AddItem> {
           }
 
           if(overSizedFiles.length > 0){
-            alertWidget('File size is too big! Size must be less than 5Mb' );
+            alertWidget('Sorry...','File size is too big! Size must be less than 5Mb' );
           }
         }
       }
@@ -446,7 +446,7 @@ class _AddItemState extends State<AddItem> {
 
         if(filedoc != null){
           if(filedoc.count > 5 || billList.length == 5){
-            alertWidget('You can only upload 5 bills per product'); 
+            alertWidget('Sorry...','You can only upload 5 bills per product'); 
           }
 
           if(filedoc.count <= 5){
@@ -462,12 +462,12 @@ class _AddItemState extends State<AddItem> {
           }
 
           if(overSizedFiles.length > 0){
-            alertWidget('File size is too big! Size must be less than 5Mb'); 
+            alertWidget('Sorry...','File size is too big! Size must be less than 5Mb'); 
           }
         }
       }
     }catch(e){
-      alertWidget('Storage access permission is denied, please allow it in the settings');
+      alertWidget('Whoops...','Storage access permission is denied, please allow it in the settings');
     }
   }
 }
